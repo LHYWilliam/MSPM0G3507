@@ -449,6 +449,16 @@
               <FileType>5</FileType>
               <FilePath>..\hardware\LED.h</FilePath>
             </File>
+            <File>
+              <FileName>motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\hardware\motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>motor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\hardware\motor.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
