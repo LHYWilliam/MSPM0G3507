@@ -439,6 +439,16 @@
               <FileType>5</FileType>
               <FilePath>..\hardware\key.h</FilePath>
             </File>
+            <File>
+              <FileName>LED.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\hardware\LED.c</FilePath>
+            </File>
+            <File>
+              <FileName>LED.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\hardware\LED.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
