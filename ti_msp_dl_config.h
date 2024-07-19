@@ -75,12 +75,15 @@ extern "C" {
 #define CPUCLK_FREQ                                                     32000000
 
 
+
+
 /* clang-format on */
 
 void SYSCFG_DL_init(void);
 void SYSCFG_DL_initPower(void);
 void SYSCFG_DL_GPIO_init(void);
 void SYSCFG_DL_SYSCTL_init(void);
+void SYSCFG_DL_SYSTICK_init(void);
 
 
 #ifdef __cplusplus

@@ -50,6 +50,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     SYSCFG_DL_GPIO_init();
     /* Module-Specific Initializations*/
     SYSCFG_DL_SYSCTL_init();
+    SYSCFG_DL_SYSTICK_init();
 }
 
 SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
@@ -57,8 +58,10 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_GPIO_reset(GPIOA);
     DL_GPIO_reset(GPIOB);
 
+
     DL_GPIO_enablePower(GPIOA);
     DL_GPIO_enablePower(GPIOB);
+
     delay_cycles(POWER_STARTUP_DELAY);
 }
 
@@ -83,4 +86,13 @@ SYSCONFIG_WEAK void SYSCFG_DL_SYSCTL_init(void)
 
 }
 
+
+SYSCONFIG_WEAK void SYSCFG_DL_SYSTICK_init(void)
+{
+    /*
+     * Initializes the SysTick period to 1.00 ms,
+     * enables the interrupt, and starts the SysTick Timer
+     */
+    DL_SYSTICK_config(32000);
+}
 

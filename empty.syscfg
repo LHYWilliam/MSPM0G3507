@@ -8,7 +8,8 @@
 /**
  * Import the modules used in this configuration.
  */
-const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
+const SYSCTL  = scripting.addModule("/ti/driverlib/SYSCTL");
+const SYSTICK = scripting.addModule("/ti/driverlib/SYSTICK");
 
 /**
  * Write custom configuration values to the imported modules.
@@ -16,6 +17,12 @@ const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
 SYSCTL.forceDefaultClkConfig = true;
 
 const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
+
+SYSTICK.periodEnable      = true;
+SYSTICK.period            = 32000;
+SYSTICK.interruptEnable   = true;
+SYSTICK.interruptPriority = "0";
+SYSTICK.systickEnable     = true;
 
 /**
  * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future

@@ -285,12 +285,12 @@
                 <Size>0x20000</Size>
               </OCR_RVCT5>
               <OCR_RVCT6>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x20200000</StartAddress>
                 <Size>0x8000</Size>
               </OCR_RVCT6>
               <OCR_RVCT7>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x20300000</StartAddress>
                 <Size>0x8000</Size>
               </OCR_RVCT7>
@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>__MSPM0G3507__</Define>
               <Undefine></Undefine>
-              <IncludePath>..\core;..\driverlib;C:\ti\mspm0_sdk_2_01_00_03\source</IncludePath>
+              <IncludePath>..\util;..\core;..\driverlib;..\..\MSPM0G3507;C:\ti\mspm0_sdk_2_01_00_03\source</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -408,6 +408,21 @@
               <FileName>startup_mspm0g350x_uvision.s</FileName>
               <FileType>2</FileType>
               <FilePath>startup_mspm0g350x_uvision.s</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Util</GroupName>
+          <Files>
+            <File>
+              <FileName>delay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\util\delay.c</FilePath>
+            </File>
+            <File>
+              <FileName>delay.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\util\delay.h</FilePath>
             </File>
           </Files>
         </Group>
