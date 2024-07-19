@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>__MSPM0G3507__</Define>
               <Undefine></Undefine>
-              <IncludePath>..\util;..\hardware;..\core;..\driverlib;..\..\MSPM0G3507;C:\ti\mspm0_sdk_2_01_00_03\source</IncludePath>
+              <IncludePath>..\system;..\hardware;..\util;..\core;..\driverlib;..\..\MSPM0G3507;C:\ti\mspm0_sdk_2_01_00_03\source</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -412,17 +412,17 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Util</GroupName>
+          <GroupName>System</GroupName>
           <Files>
             <File>
-              <FileName>delay.c</FileName>
+              <FileName>serial.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\util\delay.c</FilePath>
+              <FilePath>..\system\serial.c</FilePath>
             </File>
             <File>
-              <FileName>delay.h</FileName>
+              <FileName>serial.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\util\delay.h</FilePath>
+              <FilePath>..\system\serial.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -448,6 +448,21 @@
               <FileName>LED.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\hardware\LED.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Util</GroupName>
+          <Files>
+            <File>
+              <FileName>delay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\util\delay.c</FilePath>
+            </File>
+            <File>
+              <FileName>delay.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\util\delay.h</FilePath>
             </File>
           </Files>
         </Group>
