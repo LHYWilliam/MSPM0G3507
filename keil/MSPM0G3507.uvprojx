@@ -450,9 +450,19 @@
               <FilePath>..\driverlib\dl_adc12.c</FilePath>
             </File>
             <File>
+              <FileName>dl_adc12.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_adc12.h</FilePath>
+            </File>
+            <File>
               <FileName>dl_aes.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\driverlib\dl_aes.c</FilePath>
+            </File>
+            <File>
+              <FileName>dl_aes.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_aes.h</FilePath>
             </File>
             <File>
               <FileName>dl_aesadv.c</FileName>
@@ -460,9 +470,24 @@
               <FilePath>..\driverlib\dl_aesadv.c</FilePath>
             </File>
             <File>
+              <FileName>dl_aesadv.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_aesadv.h</FilePath>
+            </File>
+            <File>
               <FileName>dl_common.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\driverlib\dl_common.c</FilePath>
+            </File>
+            <File>
+              <FileName>dl_common.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_common.h</FilePath>
+            </File>
+            <File>
+              <FileName>dl_comp.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_comp.h</FilePath>
             </File>
             <File>
               <FileName>dl_crc.c</FileName>
@@ -470,9 +495,19 @@
               <FilePath>..\driverlib\dl_crc.c</FilePath>
             </File>
             <File>
+              <FileName>dl_crc.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_crc.h</FilePath>
+            </File>
+            <File>
               <FileName>dl_crcp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\driverlib\dl_crcp.c</FilePath>
+            </File>
+            <File>
+              <FileName>dl_crcp.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_crcp.h</FilePath>
             </File>
             <File>
               <FileName>dl_dac12.c</FileName>
@@ -480,9 +515,19 @@
               <FilePath>..\driverlib\dl_dac12.c</FilePath>
             </File>
             <File>
+              <FileName>dl_dac12.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_dac12.h</FilePath>
+            </File>
+            <File>
               <FileName>dl_dma.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\driverlib\dl_dma.c</FilePath>
+            </File>
+            <File>
+              <FileName>dl_dma.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_dma.h</FilePath>
             </File>
             <File>
               <FileName>dl_flashctl.c</FileName>
@@ -490,9 +535,34 @@
               <FilePath>..\driverlib\dl_flashctl.c</FilePath>
             </File>
             <File>
+              <FileName>dl_flashctl.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_flashctl.h</FilePath>
+            </File>
+            <File>
+              <FileName>dl_gpamp.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_gpamp.h</FilePath>
+            </File>
+            <File>
+              <FileName>dl_gpio.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_gpio.h</FilePath>
+            </File>
+            <File>
               <FileName>dl_i2c.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\driverlib\dl_i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>dl_i2c.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_i2c.h</FilePath>
+            </File>
+            <File>
+              <FileName>dl_iwdt.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_iwdt.h</FilePath>
             </File>
             <File>
               <FileName>dl_keystorectl.c</FileName>
@@ -500,9 +570,19 @@
               <FilePath>..\driverlib\dl_keystorectl.c</FilePath>
             </File>
             <File>
+              <FileName>dl_keystorectl.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_keystorectl.h</FilePath>
+            </File>
+            <File>
               <FileName>dl_lcd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\driverlib\dl_lcd.c</FilePath>
+            </File>
+            <File>
+              <FileName>dl_lcd.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_lcd.h</FilePath>
             </File>
             <File>
               <FileName>dl_lfss.c</FileName>
@@ -510,9 +590,19 @@
               <FilePath>..\driverlib\dl_lfss.c</FilePath>
             </File>
             <File>
+              <FileName>dl_lfss.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_lfss.h</FilePath>
+            </File>
+            <File>
               <FileName>dl_mathacl.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\driverlib\dl_mathacl.c</FilePath>
+            </File>
+            <File>
+              <FileName>dl_mathacl.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_mathacl.h</FilePath>
             </File>
             <File>
               <FileName>dl_mcan.c</FileName>
@@ -520,9 +610,29 @@
               <FilePath>..\driverlib\dl_mcan.c</FilePath>
             </File>
             <File>
+              <FileName>dl_mcan.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_mcan.h</FilePath>
+            </File>
+            <File>
               <FileName>dl_opa.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\driverlib\dl_opa.c</FilePath>
+            </File>
+            <File>
+              <FileName>dl_opa.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_opa.h</FilePath>
+            </File>
+            <File>
+              <FileName>dl_rtc.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_rtc.h</FilePath>
+            </File>
+            <File>
+              <FileName>dl_rtc_a.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_rtc_a.h</FilePath>
             </File>
             <File>
               <FileName>dl_rtc_common.c</FileName>
@@ -530,9 +640,29 @@
               <FilePath>..\driverlib\dl_rtc_common.c</FilePath>
             </File>
             <File>
+              <FileName>dl_rtc_common.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_rtc_common.h</FilePath>
+            </File>
+            <File>
+              <FileName>dl_scratchpad.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_scratchpad.h</FilePath>
+            </File>
+            <File>
               <FileName>dl_spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\driverlib\dl_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>dl_spi.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_spi.h</FilePath>
+            </File>
+            <File>
+              <FileName>dl_tamperio.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_tamperio.h</FilePath>
             </File>
             <File>
               <FileName>dl_timer.c</FileName>
@@ -540,9 +670,29 @@
               <FilePath>..\driverlib\dl_timer.c</FilePath>
             </File>
             <File>
+              <FileName>dl_timer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_timer.h</FilePath>
+            </File>
+            <File>
+              <FileName>dl_timera.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_timera.h</FilePath>
+            </File>
+            <File>
+              <FileName>dl_timerg.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_timerg.h</FilePath>
+            </File>
+            <File>
               <FileName>dl_trng.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\driverlib\dl_trng.c</FilePath>
+            </File>
+            <File>
+              <FileName>dl_trng.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_trng.h</FilePath>
             </File>
             <File>
               <FileName>dl_uart.c</FileName>
@@ -550,9 +700,39 @@
               <FilePath>..\driverlib\dl_uart.c</FilePath>
             </File>
             <File>
+              <FileName>dl_uart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_uart.h</FilePath>
+            </File>
+            <File>
+              <FileName>dl_uart_extend.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_uart_extend.h</FilePath>
+            </File>
+            <File>
+              <FileName>dl_uart_main.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_uart_main.h</FilePath>
+            </File>
+            <File>
               <FileName>dl_vref.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\driverlib\dl_vref.c</FilePath>
+            </File>
+            <File>
+              <FileName>dl_vref.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_vref.h</FilePath>
+            </File>
+            <File>
+              <FileName>dl_wwdt.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\dl_wwdt.h</FilePath>
+            </File>
+            <File>
+              <FileName>driverlib.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\driverlib\driverlib.h</FilePath>
             </File>
           </Files>
         </Group>
