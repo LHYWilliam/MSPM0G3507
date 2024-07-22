@@ -68,6 +68,15 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
 SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 {
 
+    DL_GPIO_initDigitalOutput(OLED_SCL_IOMUX);
+
+    DL_GPIO_initDigitalOutput(OLED_SDA_IOMUX);
+
+    DL_GPIO_clearPins(OLED_PORT, OLED_SCL_PIN |
+		OLED_SDA_PIN);
+    DL_GPIO_enableOutput(OLED_PORT, OLED_SCL_PIN |
+		OLED_SDA_PIN);
+
 }
 
 

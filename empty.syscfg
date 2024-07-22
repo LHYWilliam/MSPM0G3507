@@ -8,15 +8,27 @@
 /**
  * Import the modules used in this configuration.
  */
+const GPIO    = scripting.addModule("/ti/driverlib/GPIO", {}, false);
+const GPIO1   = GPIO.addInstance();
 const SYSCTL  = scripting.addModule("/ti/driverlib/SYSCTL");
 const SYSTICK = scripting.addModule("/ti/driverlib/SYSTICK");
 
 /**
  * Write custom configuration values to the imported modules.
  */
-SYSCTL.forceDefaultClkConfig = true;
+GPIO1.$name                         = "OLED";
+GPIO1.port                          = "PORTA";
+GPIO1.associatedPins.create(2);
+GPIO1.associatedPins[0].$name       = "SCL";
+GPIO1.associatedPins[0].assignedPin = "24";
+GPIO1.associatedPins[0].pin.$assign = "PA24";
+GPIO1.associatedPins[1].$name       = "SDA";
+GPIO1.associatedPins[1].assignedPin = "25";
+GPIO1.associatedPins[1].pin.$assign = "PA25";
 
 const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
+
+SYSCTL.forceDefaultClkConfig = true;
 
 SYSTICK.periodEnable      = true;
 SYSTICK.period            = 32000;
@@ -29,7 +41,7 @@ SYSTICK.systickEnable     = true;
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
  * re-solve from scratch.
  */
-SYSCTL.peripheral.$suggestSolution         = "SYSCTL";
 Board.peripheral.$suggestSolution          = "DEBUGSS";
 Board.peripheral.swclkPin.$suggestSolution = "PA20";
 Board.peripheral.swdioPin.$suggestSolution = "PA19";
+SYSCTL.peripheral.$suggestSolution         = "SYSCTL";

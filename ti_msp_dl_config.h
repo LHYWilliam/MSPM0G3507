@@ -77,12 +77,25 @@ extern "C" {
 
 
 
+/* Port definition for Pin Group OLED */
+#define OLED_PORT                                                        (GPIOA)
+
+/* Defines for SCL: GPIOA.24 with pinCMx 54 on package pin 25 */
+#define OLED_SCL_PIN                                            (DL_GPIO_PIN_24)
+#define OLED_SCL_IOMUX                                           (IOMUX_PINCM54)
+/* Defines for SDA: GPIOA.25 with pinCMx 55 on package pin 26 */
+#define OLED_SDA_PIN                                            (DL_GPIO_PIN_25)
+#define OLED_SDA_IOMUX                                           (IOMUX_PINCM55)
+
+
+
 /* clang-format on */
 
 void SYSCFG_DL_init(void);
 void SYSCFG_DL_initPower(void);
 void SYSCFG_DL_GPIO_init(void);
 void SYSCFG_DL_SYSCTL_init(void);
+
 void SYSCFG_DL_SYSTICK_init(void);
 
 
