@@ -1,11 +1,11 @@
 #include "LED.h"
 
 void LED_on(LED* led) {
-	DL_GPIO_writePinsVal(led->gpio, led->pins, led->mode == HIGH? 0xFFFFFFFF : 0);
+	DL_GPIO_writePinsVal(led->gpio, led->pins, led->mode ? 0xFFFFFFFF : 0);
 }
 
 void LED_off(LED* led) {
-	DL_GPIO_writePinsVal(led->gpio, led->pins, led->mode == HIGH? 0 : 0xFFFFFFFF);
+	DL_GPIO_writePinsVal(led->gpio, led->pins, led->mode ? 0 : 0xFFFFFFFF);
 }
 
 void LED_turn(LED* led) {
