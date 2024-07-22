@@ -17,7 +17,7 @@ typedef struct {
 	DL_TIMER_CC_INDEX Index;
 	
 	uint8_t invert;
-}Motor;
+} Motor;
 
 void Motor_set(Motor* motor, int16_t speed);
 
