@@ -35,28 +35,29 @@
 #include "OLED.h"
 #include "serial.h"
 #include "motor.h"
+#include "delay.h"
 
 Serial OpenMVSerial = {
 	.uart = OpenMVSerial_INST,
 };
 
 Motor motorLeft = {
-	.PWM = MotorPWM_INST,
-	.Index = GPIO_MotorPWM_C0_IDX,
 	.IN1_gpio = MotorIN_LeftIN1_PORT,
 	.IN1_pins = MotorIN_LeftIN1_PIN,
 	.IN2_gpio = MotorIN_LeftIN2_PORT,
 	.IN2_pins = MotorIN_LeftIN2_PIN,
-	.invert = DISABLE,
+	.PWM = MotorPWM_INST,
+	.Index = GPIO_MotorPWM_C0_IDX,
+	.invert = ENABLE,
 };
 
 Motor motorRight = {
-	.PWM = MotorPWM_INST,
-	.Index = GPIO_MotorPWM_C1_IDX,
 	.IN1_gpio = MotorIN_RightIN1_PORT,
 	.IN1_pins = MotorIN_RightIN1_PIN,
 	.IN2_gpio = MotorIN_RightIN2_PORT,
 	.IN2_pins = MotorIN_RightIN2_PIN,
+	.PWM = MotorPWM_INST,
+	.Index = GPIO_MotorPWM_C1_IDX,
 	.invert = DISABLE,
 };
 
@@ -79,7 +80,7 @@ DirectionType direction = Forward;
 char *directionString[] = {"Forward", "TurnLeft", "TurnRight", "TurnBack"};
 
 uint16_t advanceBaseSpeed = 2048;
-uint16_t turnBaseSpeed = 790;
+uint16_t turnBaseSpeed = 920;
 
 int16_t AdvancediffSpeed = 0;
 int16_t turnDiffSpeed = 0;
@@ -94,6 +95,9 @@ void Serial_Handler(Serial *serial);
 int main(void)
 {
     SYSCFG_DL_init();
+	SysTick->CTRL = 0;
+	
+	Delay_ms(2500);
 	
 	OLED_Init();
 	Serial_init(&OpenMVSerial);
@@ -121,14 +125,14 @@ void Timer_INST_IRQHandler(void) {
             break;
 
         case Advance:
-            Motor_set(&motorLeft, advanceBaseSpeed + AdvancediffSpeed);
-            Motor_set(&motorRight, advanceBaseSpeed - AdvancediffSpeed);
+            Motor_set(&motorLeft, advanceBaseSpeed - AdvancediffSpeed);
+            Motor_set(&motorRight, advanceBaseSpeed + AdvancediffSpeed);
             break;
 
         case Turn:
             if (turnTimer) {
-                Motor_set(&motorLeft, +turnDiffSpeed);
-                Motor_set(&motorRight, -turnDiffSpeed);
+                Motor_set(&motorLeft, -turnDiffSpeed);
+                Motor_set(&motorRight, +turnDiffSpeed);
 
                 turnTimer += 10;
                 if (turnTimer > turnTime) {
@@ -139,8 +143,8 @@ void Timer_INST_IRQHandler(void) {
             break;
 
         case Round:
-            Motor_set(&motorLeft, +turnDiffSpeed);
-            Motor_set(&motorRight, -turnDiffSpeed);
+            Motor_set(&motorLeft, -turnDiffSpeed);
+            Motor_set(&motorRight, +turnDiffSpeed);
             break;
         }
     }

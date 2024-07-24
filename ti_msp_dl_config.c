@@ -173,7 +173,7 @@ static const DL_TimerA_ClockConfig gMotorPWMClockConfig = {
 };
 
 static const DL_TimerA_PWMConfig gMotorPWMConfig = {
-    .pwmMode = DL_TIMER_PWM_MODE_EDGE_ALIGN,
+    .pwmMode = DL_TIMER_PWM_MODE_EDGE_ALIGN_UP,
     .period = 7200,
     .isTimerWithFourCC = true,
     .startTimer = DL_TIMER_START,
@@ -192,14 +192,14 @@ SYSCONFIG_WEAK void SYSCFG_DL_MotorPWM_init(void) {
 		DL_TIMERA_CAPTURE_COMPARE_0_INDEX);
 
     DL_TimerA_setCaptCompUpdateMethod(MotorPWM_INST, DL_TIMER_CC_UPDATE_METHOD_IMMEDIATE, DL_TIMERA_CAPTURE_COMPARE_0_INDEX);
-    DL_TimerA_setCaptureCompareValue(MotorPWM_INST, 7200, DL_TIMER_CC_0_INDEX);
+    DL_TimerA_setCaptureCompareValue(MotorPWM_INST, 0, DL_TIMER_CC_0_INDEX);
 
     DL_TimerA_setCaptureCompareOutCtl(MotorPWM_INST, DL_TIMER_CC_OCTL_INIT_VAL_LOW,
 		DL_TIMER_CC_OCTL_INV_OUT_DISABLED, DL_TIMER_CC_OCTL_SRC_FUNCVAL,
 		DL_TIMERA_CAPTURE_COMPARE_1_INDEX);
 
     DL_TimerA_setCaptCompUpdateMethod(MotorPWM_INST, DL_TIMER_CC_UPDATE_METHOD_IMMEDIATE, DL_TIMERA_CAPTURE_COMPARE_1_INDEX);
-    DL_TimerA_setCaptureCompareValue(MotorPWM_INST, 7200, DL_TIMER_CC_1_INDEX);
+    DL_TimerA_setCaptureCompareValue(MotorPWM_INST, 0, DL_TIMER_CC_1_INDEX);
 
     DL_TimerA_enableClock(MotorPWM_INST);
 

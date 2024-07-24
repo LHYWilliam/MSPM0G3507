@@ -5,5 +5,5 @@ void Motor_set(Motor* motor, int16_t speed) {
 	DL_GPIO_writePinsVal(motor->IN1_gpio, motor->IN1_pins, speed > 0 ? setMode : ~setMode);
 	DL_GPIO_writePinsVal(motor->IN2_gpio, motor->IN2_pins, speed > 0 ? ~setMode : setMode);
 	
-	DL_TimerG_setCaptureCompareValue(motor->PWM, speed > 0 ? speed : -speed, motor->Index);
+	DL_TimerA_setCaptureCompareValue(motor->PWM, speed > 0 ? speed : -speed, motor->Index);
 }

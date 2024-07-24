@@ -61,6 +61,7 @@ PWM1.clockDivider                       = 8;
 PWM1.timerCount                         = 7200;
 PWM1.timerStartTimer                    = true;
 PWM1.$name                              = "MotorPWM";
+PWM1.pwmMode                            = "EDGE_ALIGN_UP";
 PWM1.peripheral.$assign                 = "TIMA0";
 PWM1.peripheral.ccp0Pin.$assign         = "PA8";
 PWM1.peripheral.ccp1Pin.$assign         = "PA9";
