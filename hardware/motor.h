@@ -6,6 +6,12 @@
 #define DISABLE 0
 #define ENABLE  1
 
+#define LIMIT(data, low, high)                                                 \
+    do {                                                                       \
+        data = data < low ? low : data;                                        \
+        data = data > high ? high : data;                                      \
+    } while (0)
+
 typedef struct {
 	GPIO_Regs* IN1_gpio;
 	uint32_t IN1_pins;

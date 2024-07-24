@@ -3,6 +3,12 @@
 
 #include "serial.h"
 
+void Serial_init(Serial* serial) {
+	serial->count = 0;
+    serial->RecieveFlag = RESET;
+    serial->type = None;
+}
+
 void Serial_writeByte(Serial* serial, uint8_t byte) {
 	while(DL_UART_Main_isBusy(serial->uart));
 	
@@ -34,4 +40,10 @@ void Serial_printf(Serial* serial, char *format, ...) {
     for (uint8_t i = 0; string[i] != '\0'; i++) {
         Serial_writeByte(serial, string[i]);
     }
+}
+
+void Serial_clear(Serial *serial) {
+    serial->count = 0;
+    serial->type = None;
+    serial->RecieveFlag = RESET;
 }

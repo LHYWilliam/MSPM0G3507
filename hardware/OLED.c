@@ -4,8 +4,8 @@
 #include "OLED_Font.h"
 
 /*引脚配置*/
-#define OLED_W_SCL(x)        DL_GPIO_writePinsVal(OLED_PORT, OLED_SCL_PIN, (x) ? 0xFFFFFFFF : 0)
-#define OLED_W_SDA(x)        DL_GPIO_writePinsVal(OLED_PORT, OLED_SDA_PIN, (x) ? 0xFFFFFFFF : 0)
+#define OLED_W_SCL(x)        DL_GPIO_writePinsVal(OLED_PORT, OLED_SCL_PIN, (x) ? OLED_SCL_PIN : 0)
+#define OLED_W_SDA(x)        DL_GPIO_writePinsVal(OLED_PORT, OLED_SDA_PIN, (x) ? OLED_SDA_PIN : 0)
 
 /*引脚初始化*/
 void OLED_I2C_Init(void)
