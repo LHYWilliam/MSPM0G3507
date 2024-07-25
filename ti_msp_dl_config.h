@@ -151,8 +151,6 @@ extern "C" {
 #define MotorIN_RightIN2_PIN                                     (DL_GPIO_PIN_9)
 #define MotorIN_RightIN2_IOMUX                                   (IOMUX_PINCM26)
 
-
-
 /* clang-format on */
 
 void SYSCFG_DL_init(void);
@@ -163,7 +161,6 @@ void SYSCFG_DL_MotorPWM_init(void);
 void SYSCFG_DL_Timer_init(void);
 void SYSCFG_DL_OpenMVSerial_init(void);
 
-void SYSCFG_DL_SYSTICK_init(void);
 
 bool SYSCFG_DL_saveConfiguration(void);
 bool SYSCFG_DL_restoreConfiguration(void);

@@ -8,17 +8,16 @@
 /**
  * Import the modules used in this configuration.
  */
-const GPIO    = scripting.addModule("/ti/driverlib/GPIO", {}, false);
-const GPIO1   = GPIO.addInstance();
-const GPIO2   = GPIO.addInstance();
-const PWM     = scripting.addModule("/ti/driverlib/PWM", {}, false);
-const PWM1    = PWM.addInstance();
-const SYSCTL  = scripting.addModule("/ti/driverlib/SYSCTL");
-const SYSTICK = scripting.addModule("/ti/driverlib/SYSTICK");
-const TIMER   = scripting.addModule("/ti/driverlib/TIMER", {}, false);
-const TIMER1  = TIMER.addInstance();
-const UART    = scripting.addModule("/ti/driverlib/UART", {}, false);
-const UART1   = UART.addInstance();
+const GPIO   = scripting.addModule("/ti/driverlib/GPIO", {}, false);
+const GPIO1  = GPIO.addInstance();
+const GPIO2  = GPIO.addInstance();
+const PWM    = scripting.addModule("/ti/driverlib/PWM", {}, false);
+const PWM1   = PWM.addInstance();
+const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
+const TIMER  = scripting.addModule("/ti/driverlib/TIMER", {}, false);
+const TIMER1 = TIMER.addInstance();
+const UART   = scripting.addModule("/ti/driverlib/UART", {}, false);
+const UART1  = UART.addInstance();
 
 /**
  * Write custom configuration values to the imported modules.
@@ -80,12 +79,6 @@ PWM1.ccp1PinConfig.passedPeripheralType = scripting.forceWrite("Digital");
 
 SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.clockTreeEn           = true;
-
-SYSTICK.periodEnable      = true;
-SYSTICK.period            = 32000;
-SYSTICK.interruptEnable   = true;
-SYSTICK.interruptPriority = "0";
-SYSTICK.systickEnable     = true;
 
 TIMER1.$name              = "Timer";
 TIMER1.timerClkDiv        = 8;

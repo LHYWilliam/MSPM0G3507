@@ -55,7 +55,6 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     SYSCFG_DL_MotorPWM_init();
     SYSCFG_DL_Timer_init();
     SYSCFG_DL_OpenMVSerial_init();
-    SYSCFG_DL_SYSTICK_init();
     /* Ensure backup structures have no valid state */
 	gMotorPWMBackup.backupRdy 	= false;
 
@@ -93,13 +92,11 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_TimerG_reset(Timer_INST);
     DL_UART_Main_reset(OpenMVSerial_INST);
 
-
     DL_GPIO_enablePower(GPIOA);
     DL_GPIO_enablePower(GPIOB);
     DL_TimerA_enablePower(MotorPWM_INST);
     DL_TimerG_enablePower(Timer_INST);
     DL_UART_Main_enablePower(OpenMVSerial_INST);
-
     delay_cycles(POWER_STARTUP_DELAY);
 }
 
@@ -287,14 +284,5 @@ SYSCONFIG_WEAK void SYSCFG_DL_OpenMVSerial_init(void)
 
 
     DL_UART_Main_enable(OpenMVSerial_INST);
-}
-
-SYSCONFIG_WEAK void SYSCFG_DL_SYSTICK_init(void)
-{
-    /*
-     * Initializes the SysTick period to 1.00 ms,
-     * enables the interrupt, and starts the SysTick Timer
-     */
-    DL_SYSTICK_config(32000);
 }
 
