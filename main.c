@@ -95,7 +95,6 @@ void Serial_Handler(Serial *serial);
 int main(void)
 {
     SYSCFG_DL_init();
-	SysTick->CTRL = 0;
 	
 	Delay_ms(2500);
 	
