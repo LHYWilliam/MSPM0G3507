@@ -55,6 +55,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     SYSCFG_DL_MotorPWM_init();
     SYSCFG_DL_Timer_init();
     SYSCFG_DL_OpenMVSerial_init();
+    SYSCFG_DL_infraredADC_init();
     /* Ensure backup structures have no valid state */
 	gMotorPWMBackup.backupRdy 	= false;
 
@@ -91,12 +92,14 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_TimerA_reset(MotorPWM_INST);
     DL_TimerG_reset(Timer_INST);
     DL_UART_Main_reset(OpenMVSerial_INST);
+    DL_ADC12_reset(infraredADC_INST);
 
     DL_GPIO_enablePower(GPIOA);
     DL_GPIO_enablePower(GPIOB);
     DL_TimerA_enablePower(MotorPWM_INST);
     DL_TimerG_enablePower(Timer_INST);
     DL_UART_Main_enablePower(OpenMVSerial_INST);
+    DL_ADC12_enablePower(infraredADC_INST);
     delay_cycles(POWER_STARTUP_DELAY);
 }
 
@@ -113,9 +116,9 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
     DL_GPIO_initPeripheralInputFunction(
         GPIO_OpenMVSerial_IOMUX_RX, GPIO_OpenMVSerial_IOMUX_RX_FUNC);
 
-    DL_GPIO_initDigitalOutput(OLED_SCL_IOMUX);
+    DL_GPIO_initDigitalOutput(OLED_OLEDSDA_IOMUX);
 
-    DL_GPIO_initDigitalOutput(OLED_SDA_IOMUX);
+    DL_GPIO_initDigitalOutput(OLED_OLEDSCL_IOMUX);
 
     DL_GPIO_initDigitalOutput(MotorIN_LeftIN1_IOMUX);
 
@@ -125,14 +128,42 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 
     DL_GPIO_initDigitalOutput(MotorIN_RightIN2_IOMUX);
 
-    DL_GPIO_clearPins(GPIOA, OLED_SCL_PIN |
-		OLED_SDA_PIN |
+    DL_GPIO_initDigitalInput(Encoder_EncoderLeft1_IOMUX);
+
+    DL_GPIO_initDigitalInput(Encoder_EncoderLeft2_IOMUX);
+
+    DL_GPIO_initDigitalInput(Encoder_EncoderRight1_IOMUX);
+
+    DL_GPIO_initDigitalInput(Encoder_EncoderRight2_IOMUX);
+
+    DL_GPIO_initDigitalOutput(MPU_MPUSCL_IOMUX);
+
+    DL_GPIO_initDigitalOutput(MPU_MPUSDA_IOMUX);
+
+    DL_GPIO_clearPins(GPIOA, OLED_OLEDSDA_PIN |
+		OLED_OLEDSCL_PIN |
 		MotorIN_LeftIN1_PIN |
-		MotorIN_LeftIN2_PIN);
-    DL_GPIO_enableOutput(GPIOA, OLED_SCL_PIN |
-		OLED_SDA_PIN |
+		MotorIN_LeftIN2_PIN |
+		MPU_MPUSCL_PIN |
+		MPU_MPUSDA_PIN);
+    DL_GPIO_enableOutput(GPIOA, OLED_OLEDSDA_PIN |
+		OLED_OLEDSCL_PIN |
 		MotorIN_LeftIN1_PIN |
-		MotorIN_LeftIN2_PIN);
+		MotorIN_LeftIN2_PIN |
+		MPU_MPUSCL_PIN |
+		MPU_MPUSDA_PIN);
+    DL_GPIO_setLowerPinsPolarity(GPIOA, DL_GPIO_PIN_12_EDGE_RISE_FALL |
+		DL_GPIO_PIN_13_EDGE_RISE_FALL |
+		DL_GPIO_PIN_14_EDGE_RISE_FALL |
+		DL_GPIO_PIN_15_EDGE_RISE_FALL);
+    DL_GPIO_clearInterruptStatus(GPIOA, Encoder_EncoderLeft1_PIN |
+		Encoder_EncoderLeft2_PIN |
+		Encoder_EncoderRight1_PIN |
+		Encoder_EncoderRight2_PIN);
+    DL_GPIO_enableInterrupt(GPIOA, Encoder_EncoderLeft1_PIN |
+		Encoder_EncoderLeft2_PIN |
+		Encoder_EncoderRight1_PIN |
+		Encoder_EncoderRight2_PIN);
     DL_GPIO_clearPins(GPIOB, MotorIN_RightIN1_PIN |
 		MotorIN_RightIN2_PIN);
     DL_GPIO_enableOutput(GPIOB, MotorIN_RightIN1_PIN |
@@ -284,5 +315,26 @@ SYSCONFIG_WEAK void SYSCFG_DL_OpenMVSerial_init(void)
 
 
     DL_UART_Main_enable(OpenMVSerial_INST);
+}
+
+/* infraredADC Initialization */
+static const DL_ADC12_ClockConfig ginfraredADCClockConfig = {
+    .clockSel       = DL_ADC12_CLOCK_SYSOSC,
+    .divideRatio    = DL_ADC12_CLOCK_DIVIDE_8,
+    .freqRange      = DL_ADC12_CLOCK_FREQ_RANGE_24_TO_32,
+};
+SYSCONFIG_WEAK void SYSCFG_DL_infraredADC_init(void)
+{
+    DL_ADC12_setClockConfig(infraredADC_INST, (DL_ADC12_ClockConfig *) &ginfraredADCClockConfig);
+    DL_ADC12_setStartAddress(infraredADC_INST, DL_ADC12_SEQ_START_ADDR_01);
+    DL_ADC12_configConversionMem(infraredADC_INST, infraredADC_ADCMEM_infraredLeft,
+        DL_ADC12_INPUT_CHAN_1, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
+        DL_ADC12_BURN_OUT_SOURCE_DISABLED, DL_ADC12_TRIGGER_MODE_AUTO_NEXT, DL_ADC12_WINDOWS_COMP_MODE_DISABLED);
+    DL_ADC12_setSampleTime0(infraredADC_INST,400);
+    /* Enable ADC12 interrupt */
+    DL_ADC12_clearInterruptStatus(infraredADC_INST,(DL_ADC12_INTERRUPT_MEM1_RESULT_LOADED));
+    DL_ADC12_enableInterrupt(infraredADC_INST,(DL_ADC12_INTERRUPT_MEM1_RESULT_LOADED));
+    NVIC_SetPriority(infraredADC_INST_INT_IRQN, 1);
+    DL_ADC12_enableConversions(infraredADC_INST);
 }
 

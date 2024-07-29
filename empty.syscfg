@@ -8,9 +8,13 @@
 /**
  * Import the modules used in this configuration.
  */
+const ADC12  = scripting.addModule("/ti/driverlib/ADC12", {}, false);
+const ADC121 = ADC12.addInstance();
 const GPIO   = scripting.addModule("/ti/driverlib/GPIO", {}, false);
 const GPIO1  = GPIO.addInstance();
 const GPIO2  = GPIO.addInstance();
+const GPIO3  = GPIO.addInstance();
+const GPIO4  = GPIO.addInstance();
 const PWM    = scripting.addModule("/ti/driverlib/PWM", {}, false);
 const PWM1   = PWM.addInstance();
 const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
@@ -25,17 +29,38 @@ const UART1  = UART.addInstance();
 const gate7  = system.clockTree["MFCLKGATE"];
 gate7.enable = true;
 
+ADC121.sampClkDiv                        = "DL_ADC12_CLOCK_DIVIDE_8";
+ADC121.startAdd                          = 1;
+ADC121.endAdd                            = 3;
+ADC121.adcMem1_name                      = "infraredLeft";
+ADC121.adcMem2_name                      = "infraredCenter";
+ADC121.adcMem3_name                      = "infraredRight";
+ADC121.adcMem2chansel                    = "DL_ADC12_INPUT_CHAN_2";
+ADC121.adcMem1chansel                    = "DL_ADC12_INPUT_CHAN_1";
+ADC121.adcMem3chansel                    = "DL_ADC12_INPUT_CHAN_3";
+ADC121.sampCnt                           = 3;
+ADC121.enabledDMATriggers                = ["DL_ADC12_DMA_MEM1_RESULT_LOADED","DL_ADC12_DMA_MEM2_RESULT_LOADED","DL_ADC12_DMA_MEM3_RESULT_LOADED"];
+ADC121.$name                             = "infraredADC";
+ADC121.enabledADCMems                    = [1];
+ADC121.sampleTime0                       = "0.1 ms";
+ADC121.enabledInterrupts                 = ["DL_ADC12_INTERRUPT_MEM1_RESULT_LOADED"];
+ADC121.interruptPriority                 = "1";
+ADC121.peripheral.$assign                = "ADC1";
+ADC121.peripheral.adcPin1.$assign        = "PA16";
+ADC121.adcPin1Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric6";
+ADC121.adcPin1Config.hideOutputInversion = scripting.forceWrite(false);
+
+const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
+
 GPIO1.$name                         = "OLED";
 GPIO1.port                          = "PORTA";
 GPIO1.associatedPins.create(2);
-GPIO1.associatedPins[0].$name       = "SCL";
 GPIO1.associatedPins[0].assignedPin = "31";
+GPIO1.associatedPins[0].$name       = "OLEDSDA";
 GPIO1.associatedPins[0].pin.$assign = "PA31";
-GPIO1.associatedPins[1].$name       = "SDA";
 GPIO1.associatedPins[1].assignedPin = "28";
+GPIO1.associatedPins[1].$name       = "OLEDSCL";
 GPIO1.associatedPins[1].pin.$assign = "PA28";
-
-const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
 
 GPIO2.$name                          = "MotorIN";
 GPIO2.associatedPins.create(4);
@@ -55,6 +80,44 @@ GPIO2.associatedPins[3].$name        = "RightIN2";
 GPIO2.associatedPins[3].assignedPort = "PORTB";
 GPIO2.associatedPins[3].assignedPin  = "9";
 GPIO2.associatedPins[3].pin.$assign  = "PB9";
+
+GPIO3.$name                         = "Encoder";
+GPIO3.associatedPins.create(4);
+GPIO3.associatedPins[0].direction   = "INPUT";
+GPIO3.associatedPins[0].interruptEn = true;
+GPIO3.associatedPins[0].polarity    = "RISE_FALL";
+GPIO3.associatedPins[0].assignedPin = "12";
+GPIO3.associatedPins[0].$name       = "EncoderLeft1";
+GPIO3.associatedPins[0].pin.$assign = "PA12";
+GPIO3.associatedPins[1].$name       = "EncoderLeft2";
+GPIO3.associatedPins[1].direction   = "INPUT";
+GPIO3.associatedPins[1].interruptEn = true;
+GPIO3.associatedPins[1].polarity    = "RISE_FALL";
+GPIO3.associatedPins[1].assignedPin = "13";
+GPIO3.associatedPins[1].pin.$assign = "PA13";
+GPIO3.associatedPins[2].$name       = "EncoderRight1";
+GPIO3.associatedPins[2].direction   = "INPUT";
+GPIO3.associatedPins[2].interruptEn = true;
+GPIO3.associatedPins[2].polarity    = "RISE_FALL";
+GPIO3.associatedPins[2].assignedPin = "14";
+GPIO3.associatedPins[2].pin.$assign = "PA14";
+GPIO3.associatedPins[3].$name       = "EncoderRight2";
+GPIO3.associatedPins[3].direction   = "INPUT";
+GPIO3.associatedPins[3].interruptEn = true;
+GPIO3.associatedPins[3].polarity    = "RISE_FALL";
+GPIO3.associatedPins[3].assignedPin = "15";
+GPIO3.associatedPins[3].pin.$assign = "PA15";
+
+GPIO4.$name                         = "MPU";
+GPIO4.associatedPins.create(2);
+GPIO4.associatedPins[0].$name       = "MPUSCL";
+GPIO4.associatedPins[0].ioStructure = "OD";
+GPIO4.associatedPins[0].assignedPin = "0";
+GPIO4.associatedPins[0].pin.$assign = "PA0";
+GPIO4.associatedPins[1].$name       = "MPUSDA";
+GPIO4.associatedPins[1].ioStructure = "OD";
+GPIO4.associatedPins[1].assignedPin = "1";
+GPIO4.associatedPins[1].pin.$assign = "PA1";
 
 PWM1.clockDivider                       = 8;
 PWM1.timerCount                         = 7200;

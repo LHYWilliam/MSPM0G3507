@@ -125,15 +125,27 @@ extern "C" {
 
 
 
+/* Defines for infraredADC */
+#define infraredADC_INST                                                    ADC1
+#define infraredADC_INST_IRQHandler                              ADC1_IRQHandler
+#define infraredADC_INST_INT_IRQN                                (ADC1_INT_IRQn)
+#define infraredADC_ADCMEM_infraredLeft                       DL_ADC12_MEM_IDX_1
+#define infraredADC_ADCMEM_infraredLeft_REF         DL_ADC12_REFERENCE_VOLTAGE_VDDA
+#define infraredADC_ADCMEM_infraredLeft_REF_VOLTAGE_V                                     3.3
+#define GPIO_infraredADC_C1_PORT                                           GPIOA
+#define GPIO_infraredADC_C1_PIN                                   DL_GPIO_PIN_16
+
+
+
 /* Port definition for Pin Group OLED */
 #define OLED_PORT                                                        (GPIOA)
 
-/* Defines for SCL: GPIOA.31 with pinCMx 6 on package pin 39 */
-#define OLED_SCL_PIN                                            (DL_GPIO_PIN_31)
-#define OLED_SCL_IOMUX                                            (IOMUX_PINCM6)
-/* Defines for SDA: GPIOA.28 with pinCMx 3 on package pin 35 */
-#define OLED_SDA_PIN                                            (DL_GPIO_PIN_28)
-#define OLED_SDA_IOMUX                                            (IOMUX_PINCM3)
+/* Defines for OLEDSDA: GPIOA.31 with pinCMx 6 on package pin 39 */
+#define OLED_OLEDSDA_PIN                                        (DL_GPIO_PIN_31)
+#define OLED_OLEDSDA_IOMUX                                        (IOMUX_PINCM6)
+/* Defines for OLEDSCL: GPIOA.28 with pinCMx 3 on package pin 35 */
+#define OLED_OLEDSCL_PIN                                        (DL_GPIO_PIN_28)
+#define OLED_OLEDSCL_IOMUX                                        (IOMUX_PINCM3)
 /* Defines for LeftIN1: GPIOA.25 with pinCMx 55 on package pin 26 */
 #define MotorIN_LeftIN1_PORT                                             (GPIOA)
 #define MotorIN_LeftIN1_PIN                                     (DL_GPIO_PIN_25)
@@ -150,6 +162,37 @@ extern "C" {
 #define MotorIN_RightIN2_PORT                                            (GPIOB)
 #define MotorIN_RightIN2_PIN                                     (DL_GPIO_PIN_9)
 #define MotorIN_RightIN2_IOMUX                                   (IOMUX_PINCM26)
+/* Port definition for Pin Group Encoder */
+#define Encoder_PORT                                                     (GPIOA)
+
+/* Defines for EncoderLeft1: GPIOA.12 with pinCMx 34 on package pin 5 */
+// pins affected by this interrupt request:["EncoderLeft1","EncoderLeft2","EncoderRight1","EncoderRight2"]
+#define Encoder_INT_IRQN                                        (GPIOA_INT_IRQn)
+#define Encoder_INT_IIDX                        (DL_INTERRUPT_GROUP1_IIDX_GPIOA)
+#define Encoder_EncoderLeft1_IIDX                           (DL_GPIO_IIDX_DIO12)
+#define Encoder_EncoderLeft1_PIN                                (DL_GPIO_PIN_12)
+#define Encoder_EncoderLeft1_IOMUX                               (IOMUX_PINCM34)
+/* Defines for EncoderLeft2: GPIOA.13 with pinCMx 35 on package pin 6 */
+#define Encoder_EncoderLeft2_IIDX                           (DL_GPIO_IIDX_DIO13)
+#define Encoder_EncoderLeft2_PIN                                (DL_GPIO_PIN_13)
+#define Encoder_EncoderLeft2_IOMUX                               (IOMUX_PINCM35)
+/* Defines for EncoderRight1: GPIOA.14 with pinCMx 36 on package pin 7 */
+#define Encoder_EncoderRight1_IIDX                          (DL_GPIO_IIDX_DIO14)
+#define Encoder_EncoderRight1_PIN                               (DL_GPIO_PIN_14)
+#define Encoder_EncoderRight1_IOMUX                              (IOMUX_PINCM36)
+/* Defines for EncoderRight2: GPIOA.15 with pinCMx 37 on package pin 8 */
+#define Encoder_EncoderRight2_IIDX                          (DL_GPIO_IIDX_DIO15)
+#define Encoder_EncoderRight2_PIN                               (DL_GPIO_PIN_15)
+#define Encoder_EncoderRight2_IOMUX                              (IOMUX_PINCM37)
+/* Port definition for Pin Group MPU */
+#define MPU_PORT                                                         (GPIOA)
+
+/* Defines for MPUSCL: GPIOA.0 with pinCMx 1 on package pin 33 */
+#define MPU_MPUSCL_PIN                                           (DL_GPIO_PIN_0)
+#define MPU_MPUSCL_IOMUX                                          (IOMUX_PINCM1)
+/* Defines for MPUSDA: GPIOA.1 with pinCMx 2 on package pin 34 */
+#define MPU_MPUSDA_PIN                                           (DL_GPIO_PIN_1)
+#define MPU_MPUSDA_IOMUX                                          (IOMUX_PINCM2)
 
 /* clang-format on */
 
@@ -160,6 +203,7 @@ void SYSCFG_DL_SYSCTL_init(void);
 void SYSCFG_DL_MotorPWM_init(void);
 void SYSCFG_DL_Timer_init(void);
 void SYSCFG_DL_OpenMVSerial_init(void);
+void SYSCFG_DL_infraredADC_init(void);
 
 
 bool SYSCFG_DL_saveConfiguration(void);
