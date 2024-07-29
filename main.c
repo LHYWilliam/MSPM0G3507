@@ -139,13 +139,14 @@ uint16_t ADCValue[3];
 int16_t encoderLeft, encoderRight;
 
 int16_t speedLeft, speedRight;
+uint16_t ADCValue[3];
 uint16_t infraredLeft, infraredCener, infraredRight;
 
 int main(void) {
     SYSCFG_DL_init();
 	
-//	NVIC_ClearPendingIRQ(msTimer_INST_INT_IRQN);
-//	NVIC_EnableIRQ(msTimer_INST_INT_IRQN);
+	NVIC_ClearPendingIRQ(msTimer_INST_INT_IRQN);
+	NVIC_EnableIRQ(msTimer_INST_INT_IRQN);
 	
 	Serial_init(&BluetoothSerial);
 	
@@ -153,8 +154,8 @@ int main(void) {
 //	NVIC_ClearPendingIRQ(Bluetooth_INST_INT_IRQN);
 //	NVIC_EnableIRQ(Bluetooth_INST_INT_IRQN);
 //	
-//	NVIC_ClearPendingIRQ(infraredADC_INST_INT_IRQN);
-//	NVIC_EnableIRQ(infraredADC_INST_INT_IRQN);
+	NVIC_ClearPendingIRQ(infraredADC_INST_INT_IRQN);
+	NVIC_EnableIRQ(infraredADC_INST_INT_IRQN);
 //	
 	NVIC_ClearPendingIRQ(Encoder_INT_IRQN);
 	NVIC_EnableIRQ(Encoder_INT_IRQN);
@@ -168,11 +169,11 @@ int main(void) {
     }
 }
 
-//void msTimer_INST_IRQHandler(void) {
-//	if(DL_TimerG_getPendingInterrupt(msTimer_INST) == DL_TIMER_IIDX_ZERO) {
-//		ms++;
-//    }
-//}
+void msTimer_INST_IRQHandler(void) {
+	if(DL_TimerG_getPendingInterrupt(msTimer_INST) == DL_TIMER_IIDX_ZERO) {
+		ms++;
+    }
+}
 
 void taskTimer_INST_IRQHandler(void) {
     if(DL_TimerG_getPendingInterrupt(taskTimer_INST) == DL_TIMER_IIDX_ZERO) {
@@ -182,8 +183,6 @@ void taskTimer_INST_IRQHandler(void) {
 		encoderLeft = 0;
 		speedRight = encoderRight;
 		encoderRight = 0;
-		
-		Serial_printf(&BluetoothSerial, "%d,%d\r\n", speedLeft, speedRight);
 		
 //		switch (lineState) {
 //        case OffLine:
@@ -325,13 +324,13 @@ void taskTimer_INST_IRQHandler(void) {
 //  }
 //}
 
-//void infraredADC_INST_IRQHandler(void) {
-//	if (DL_ADC12_getPendingInterrupt(infraredADC_INST) == DL_ADC12_IIDX_MEM2_RESULT_LOADED) {
-//        infraredLeft = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredLeft);  
-//		infraredCener = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredCenter);
-//		infraredRight = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredRight);		
-//     }
-//}
+void infraredADC_INST_IRQHandler(void) {
+	if (DL_ADC12_getPendingInterrupt(infraredADC_INST) == DL_ADC12_IIDX_MEM2_RESULT_LOADED) {
+        ADCValue[0] = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredLeft);  
+		ADCValue[1] = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredCenter);
+		ADCValue[2] = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredRight);		
+     }
+}
 
 void GROUP1_IRQHandler(void) {
     uint32_t INT_PIN = DL_GPIO_getEnabledInterruptStatus(Encoder_PORT, Encoder_EncoderLeft1_PIN | Encoder_EncoderLeft2_PIN | Encoder_EncoderRight1_PIN | Encoder_EncoderRight2_PIN);
