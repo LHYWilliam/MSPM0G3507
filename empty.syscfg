@@ -41,14 +41,19 @@ ADC121.adcMem3chansel                    = "DL_ADC12_INPUT_CHAN_3";
 ADC121.sampCnt                           = 3;
 ADC121.enabledDMATriggers                = ["DL_ADC12_DMA_MEM1_RESULT_LOADED","DL_ADC12_DMA_MEM2_RESULT_LOADED","DL_ADC12_DMA_MEM3_RESULT_LOADED"];
 ADC121.$name                             = "infraredADC";
-ADC121.enabledADCMems                    = [1];
 ADC121.sampleTime0                       = "0.1 ms";
-ADC121.enabledInterrupts                 = ["DL_ADC12_INTERRUPT_MEM1_RESULT_LOADED"];
 ADC121.interruptPriority                 = "1";
+ADC121.samplingOperationMode             = "sequence";
+ADC121.repeatMode                        = true;
+ADC121.enabledInterrupts                 = ["DL_ADC12_INTERRUPT_MEM1_RESULT_LOADED","DL_ADC12_INTERRUPT_MEM2_RESULT_LOADED","DL_ADC12_INTERRUPT_MEM3_RESULT_LOADED"];
 ADC121.peripheral.$assign                = "ADC1";
 ADC121.peripheral.adcPin1.$assign        = "PA16";
-ADC121.adcPin1Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric6";
+ADC121.peripheral.adcPin2.$assign        = "PA17";
+ADC121.peripheral.adcPin3.$assign        = "PA18";
 ADC121.adcPin1Config.hideOutputInversion = scripting.forceWrite(false);
+ADC121.adcPin1Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric6";
+ADC121.adcPin2Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric4";
+ADC121.adcPin3Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric5";
 
 const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
 
@@ -129,16 +134,16 @@ PWM1.peripheral.ccp0Pin.$assign         = "PA8";
 PWM1.peripheral.ccp1Pin.$assign         = "PA9";
 PWM1.PWM_CHANNEL_0.$name                = "ti_driverlib_pwm_PWMTimerCC0";
 PWM1.PWM_CHANNEL_1.$name                = "ti_driverlib_pwm_PWMTimerCC1";
-PWM1.ccp0PinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric0";
 PWM1.ccp0PinConfig.direction            = scripting.forceWrite("OUTPUT");
 PWM1.ccp0PinConfig.hideOutputInversion  = scripting.forceWrite(false);
 PWM1.ccp0PinConfig.onlyInternalResistor = scripting.forceWrite(false);
 PWM1.ccp0PinConfig.passedPeripheralType = scripting.forceWrite("Digital");
-PWM1.ccp1PinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric1";
+PWM1.ccp0PinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric0";
 PWM1.ccp1PinConfig.direction            = scripting.forceWrite("OUTPUT");
 PWM1.ccp1PinConfig.hideOutputInversion  = scripting.forceWrite(false);
 PWM1.ccp1PinConfig.onlyInternalResistor = scripting.forceWrite(false);
 PWM1.ccp1PinConfig.passedPeripheralType = scripting.forceWrite("Digital");
+PWM1.ccp1PinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric1";
 
 SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.clockTreeEn           = true;
@@ -159,15 +164,15 @@ UART1.interruptPriority                = "1";
 UART1.peripheral.$assign               = "UART1";
 UART1.peripheral.rxPin.$assign         = "PB7";
 UART1.peripheral.txPin.$assign         = "PB6";
-UART1.txPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric2";
 UART1.txPinConfig.direction            = scripting.forceWrite("OUTPUT");
 UART1.txPinConfig.hideOutputInversion  = scripting.forceWrite(false);
 UART1.txPinConfig.onlyInternalResistor = scripting.forceWrite(false);
 UART1.txPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
-UART1.rxPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric3";
+UART1.txPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric2";
 UART1.rxPinConfig.hideOutputInversion  = scripting.forceWrite(false);
 UART1.rxPinConfig.onlyInternalResistor = scripting.forceWrite(false);
 UART1.rxPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
+UART1.rxPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric3";
 
 /**
  * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future
