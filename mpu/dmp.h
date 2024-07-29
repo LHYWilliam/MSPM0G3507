@@ -1,6 +1,8 @@
 #ifndef __DMP_H
 #define __DMP_H
 
+#include "ti_msp_dl_config.h"
+
 #include "inv_mpu.h"
 
 #define MPU6050

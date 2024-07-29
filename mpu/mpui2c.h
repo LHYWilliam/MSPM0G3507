@@ -1,44 +1,32 @@
-#ifndef __I2C_H
-#define __I2C_H
+#ifndef __MPUI2C_H
+#define __MPUI2C_H
 
-#include <stm32f10x.h>
+#include "ti_msp_dl_config.h"
 
-#include "gpio.h"
+#define SDA_OUT()   {                                                  \
+                        DL_GPIO_initDigitalOutput(MPU_MPUSDA_IOMUX);     \
+                        DL_GPIO_setPins(MPU_PORT, MPU_MPUSDA_PIN);      \
+                        DL_GPIO_enableOutput(MPU_PORT, MPU_MPUSDA_PIN); \
+                    }
+#define SDA_IN()    { DL_GPIO_initDigitalInput(MPU_MPUSDA_IOMUX); }
+#define SDA_GET()   ( ( ( DL_GPIO_readPins(MPU_PORT,MPU_MPUSDA_PIN) & MPU_MPUSDA_PIN ) > 0 ) ? 1 : 0 )
 
-#define SDA_IN()                                                               \
-    {                                                                          \
-        GPIOB->CRH &= 0XFFFFFF0F;                                              \
-        GPIOB->CRH |= 8 << 4;                                                  \
-    }
-#define SDA_OUT()                                                              \
-    {                                                                          \
-        GPIOB->CRH &= 0XFFFFFF0F;                                              \
-        GPIOB->CRH |= 3 << 4;                                                  \
-    }
-
-#define I2C_SCL PBout(8)
-#define I2C_SDA PBout(9)
-#define I2C_READ_SDA PBin(9)
-
-typedef struct {
-    char SCL[4];
-    char SDA[4];
-} I2C;
+#define SDA(x)      ( (x) ? (DL_GPIO_setPins(MPU_PORT,MPU_MPUSDA_PIN)) : (DL_GPIO_clearPins(MPU_PORT,MPU_MPUSDA_PIN)) )
+#define SCL(x)      ( (x) ? (DL_GPIO_setPins(MPU_PORT,MPU_MPUSCL_PIN)) : (DL_GPIO_clearPins(MPU_PORT,MPU_MPUSCL_PIN)) )
 
 void MPUI2C_Init();
 
 void MPUI2C_Start();
 void MPUI2C_Stop();
 
-void MPUI2C_SendByte(uint8_t txd);
-uint8_t MPUI2C_ReceiveByte(unsigned char ack);
+void MPUI2C_SendByte(uint8_t dat);
+uint8_t MPUI2C_ReceiveByte(void);
 
 uint8_t MPUI2C_WaitAck();
-void MPUI2C_Ack();
-void MPUI2C_NoAck();
+void MPUI2C_Ack(unsigned char ack);
 
 void MPUI2C_Delay();
 
-uint8_t MPUI2C_Send(uint8_t addr, uint8_t reg, const uint8_t *buf, uint8_t len);
-uint8_t MPUI2C_Receive(uint8_t addr, uint8_t reg, uint8_t *buf, uint8_t len);
+uint8_t MPUI2C_Send(uint8_t addr,uint8_t regaddr,uint8_t num,uint8_t *regdata);
+uint8_t MPUI2C_Receive(uint8_t addr, uint8_t regaddr,uint8_t num,uint8_t* Read);
 #endif

@@ -1,3 +1,5 @@
+#include "ti_msp_dl_config.h"
+
 #include "inv_mpu_dmp_motion_driver.h"
 
 #include <math.h>

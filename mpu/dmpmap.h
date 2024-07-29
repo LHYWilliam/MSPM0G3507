@@ -6,6 +6,8 @@
 #ifndef DMPMAP_H
 #define DMPMAP_H
 
+#include "ti_msp_dl_config.h"
+
 #define DMP_PTAT 0
 #define DMP_XGYR 2
 #define DMP_YGYR 4

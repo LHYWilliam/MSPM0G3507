@@ -37,8 +37,8 @@
 
 void MPU_Init();
 
-void MPU_Send(uint8_t RegisterAddress, const uint8_t *bytes, uint8_t length);
-void MPU_Receieve(uint8_t RegisterAddress, uint8_t *bytes, uint8_t length);
+void MPU_Send(uint8_t RegisterAddress, uint8_t length, uint8_t *bytes);
+void MPU_Receieve(uint8_t RegisterAddress, uint8_t length, uint8_t *bytes);
 
 void MPU_GetData(int16_t *xacc, int16_t *yacc, int16_t *zacc, int16_t *xgyro,
                  int16_t *ygyro, int16_t *zgyro);

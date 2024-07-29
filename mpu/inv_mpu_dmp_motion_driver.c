@@ -31,8 +31,6 @@
  * get_ms(unsigned long *count)
  */
 
-#include "rtc.h"
-
 #define MPU6050
 #define MOTION_DRIVER_TARGET_MSP430
 
@@ -40,7 +38,7 @@
 // #include "msp430.h"
 // #include "msp430_clock.h"
 #define delay_ms Delay_ms
-#define get_ms(a) *a = RTC_time_ms()
+#define get_ms(a)
 #define log_i(...)                                                             \
     do {                                                                       \
     } while (0)

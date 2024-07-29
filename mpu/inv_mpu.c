@@ -17,6 +17,8 @@
  *                  MPU9150 (or MPU6050 w/ AK8975 on the auxiliary bus)
  *                  MPU9250 (or MPU6500 w/ AK8963 on the auxiliary bus)
  */
+ #include "ti_msp_dl_config.h"
+ 
 #include "inv_mpu.h"
 #include <math.h>
 #include <stdlib.h>
@@ -37,7 +39,6 @@
 
 #include "delay.h"
 #include "mpui2c.h"
-#include "rtc.h"
 
 #define MPU6050
 #define MOTION_DRIVER_TARGET_MSP430
@@ -48,10 +49,10 @@
 // #include "msp430_i2c.h"
 // #include "msp430_interrupt.h"
 
-#define i2c_write(a, b, c, d) MPUI2C_Send(a, b, d, c)
-#define i2c_read(a, b, c, d) MPUI2C_Receive(a, b, d, c)
+#define i2c_write(a, b, c, d) MPUI2C_Send(a, b, c, d)
+#define i2c_read(a, b, c, d) MPUI2C_Receive(a, b, c, d)
 #define delay_ms Delay_ms
-#define get_ms(a) *a = RTC_time_ms()
+#define get_ms(a) 
 // static inline int reg_int_cb(struct int_param_s *int_param) {
 //     // return msp430_reg_int_cb(int_param->cb, int_param->pin,
 //     // int_param->lp_exit,

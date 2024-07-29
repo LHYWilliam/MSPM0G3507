@@ -6,23 +6,23 @@
 void MPU_Init() {
     MPUI2C_Init();
 
-    const uint8_t PWR_MGMT_1 = 0x01;
-    const uint8_t PWR_MGMT_2 = 0x00;
+    uint8_t PWR_MGMT_1 = 0x01;
+    uint8_t PWR_MGMT_2 = 0x00;
 
-    const uint8_t SMPLRT_DIV = 0x09;
+    uint8_t SMPLRT_DIV = 0x09;
 
-    const uint8_t CONFIG = 0x06;
-    const uint8_t GYRO_CONFIG = 0x18;
-    const uint8_t ACCEL_CONFIG = 0x18;
+    uint8_t CONFIG = 0x06;
+    uint8_t GYRO_CONFIG = 0x18;
+    uint8_t ACCEL_CONFIG = 0x18;
 
-    MPU_Send(MPU6050_PWR_MGMT_1, &PWR_MGMT_1, 1);
-    MPU_Send(MPU6050_PWR_MGMT_2, &PWR_MGMT_2, 1);
+    MPU_Send(MPU6050_PWR_MGMT_1, 1, &PWR_MGMT_1);
+    MPU_Send(MPU6050_PWR_MGMT_2, 1, &PWR_MGMT_2);
 
-    MPU_Send(MPU6050_SMPLRT_DIV, &SMPLRT_DIV, 1);
+    MPU_Send(MPU6050_SMPLRT_DIV, 1, &SMPLRT_DIV);
 
-    MPU_Send(MPU6050_CONFIG, &CONFIG, 1);
-    MPU_Send(MPU6050_ACCEL_CONFIG, &ACCEL_CONFIG, 1);
-    MPU_Send(MPU6050_GYRO_CONFIG, &GYRO_CONFIG, 1);
+    MPU_Send(MPU6050_CONFIG, 1, &CONFIG);
+    MPU_Send(MPU6050_ACCEL_CONFIG, 1, &ACCEL_CONFIG);
+    MPU_Send(MPU6050_GYRO_CONFIG, 1, &GYRO_CONFIG);
 }
 
 void MPU_AdaptOffset(uint16_t times, int16_t *xacc_offset, int16_t *yacc_offset,
@@ -51,8 +51,8 @@ void MPU_AdaptOffset(uint16_t times, int16_t *xacc_offset, int16_t *yacc_offset,
 void MPU_GetData(int16_t *xacc, int16_t *yacc, int16_t *zacc, int16_t *xgyro,
                  int16_t *ygyro, int16_t *zgyro) {
     uint8_t acc[6], gyro[6];
-    MPU_Receieve(MPU6050_ACCEL_XOUT_H, acc, 6);
-    MPU_Receieve(MPU6050_GYRO_XOUT_H, gyro, 6);
+    MPU_Receieve(MPU6050_ACCEL_XOUT_H, 6, acc);
+    MPU_Receieve(MPU6050_GYRO_XOUT_H, 6, gyro);
 
     *xacc = (acc[0] << 8) | acc[1];
     *yacc = (acc[2] << 8) | acc[3];
@@ -62,9 +62,9 @@ void MPU_GetData(int16_t *xacc, int16_t *yacc, int16_t *zacc, int16_t *xgyro,
     *zgyro = (gyro[4] << 8) | gyro[5];
 }
 
-void MPU_Send(uint8_t RegisterAddress, const uint8_t *bytes, uint8_t length) {
-    MPUI2C_Send(MPU6050_DEVICE_ADDRESS, RegisterAddress, bytes, length);
+void MPU_Send(uint8_t RegisterAddress, uint8_t length, uint8_t *bytes) {
+    MPUI2C_Send(MPU6050_DEVICE_ADDRESS, RegisterAddress, length, bytes);
 }
-void MPU_Receieve(uint8_t RegisterAddress, uint8_t *bytes, uint8_t length) {
-    MPUI2C_Receive(MPU6050_DEVICE_ADDRESS, RegisterAddress, bytes, length);
+void MPU_Receieve(uint8_t RegisterAddress, uint8_t length, uint8_t *bytes) {
+    MPUI2C_Receive(MPU6050_DEVICE_ADDRESS, RegisterAddress, length, bytes);
 }
