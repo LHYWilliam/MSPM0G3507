@@ -54,8 +54,9 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     SYSCFG_DL_SYSCTL_init();
     SYSCFG_DL_MotorPWM_init();
     SYSCFG_DL_Timer_init();
-    SYSCFG_DL_OpenMVSerial_init();
+    SYSCFG_DL_Bluetooth_init();
     SYSCFG_DL_infraredADC_init();
+    SYSCFG_DL_SYSTICK_init();
     /* Ensure backup structures have no valid state */
 	gMotorPWMBackup.backupRdy 	= false;
 
@@ -91,15 +92,17 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_GPIO_reset(GPIOB);
     DL_TimerA_reset(MotorPWM_INST);
     DL_TimerG_reset(Timer_INST);
-    DL_UART_Main_reset(OpenMVSerial_INST);
+    DL_UART_Main_reset(Bluetooth_INST);
     DL_ADC12_reset(infraredADC_INST);
+
 
     DL_GPIO_enablePower(GPIOA);
     DL_GPIO_enablePower(GPIOB);
     DL_TimerA_enablePower(MotorPWM_INST);
     DL_TimerG_enablePower(Timer_INST);
-    DL_UART_Main_enablePower(OpenMVSerial_INST);
+    DL_UART_Main_enablePower(Bluetooth_INST);
     DL_ADC12_enablePower(infraredADC_INST);
+
     delay_cycles(POWER_STARTUP_DELAY);
 }
 
@@ -112,9 +115,17 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
     DL_GPIO_enableOutput(GPIO_MotorPWM_C1_PORT, GPIO_MotorPWM_C1_PIN);
 
     DL_GPIO_initPeripheralOutputFunction(
-        GPIO_OpenMVSerial_IOMUX_TX, GPIO_OpenMVSerial_IOMUX_TX_FUNC);
+        GPIO_Bluetooth_IOMUX_TX, GPIO_Bluetooth_IOMUX_TX_FUNC);
     DL_GPIO_initPeripheralInputFunction(
-        GPIO_OpenMVSerial_IOMUX_RX, GPIO_OpenMVSerial_IOMUX_RX_FUNC);
+        GPIO_Bluetooth_IOMUX_RX, GPIO_Bluetooth_IOMUX_RX_FUNC);
+
+    DL_GPIO_initDigitalOutputFeatures(LED_PIN_0_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_DOWN,
+		 DL_GPIO_DRIVE_STRENGTH_LOW, DL_GPIO_HIZ_DISABLE);
+
+    DL_GPIO_initDigitalOutputFeatures(Buzzer_Buzzer1_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_DRIVE_STRENGTH_LOW, DL_GPIO_HIZ_DISABLE);
 
     DL_GPIO_initDigitalOutput(OLED_OLEDSDA_IOMUX);
 
@@ -128,46 +139,78 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 
     DL_GPIO_initDigitalOutput(MotorIN_RightIN2_IOMUX);
 
-    DL_GPIO_initDigitalInput(Encoder_EncoderLeft1_IOMUX);
+    DL_GPIO_initDigitalInputFeatures(Encoder_EncoderLeft1_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_DOWN,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
-    DL_GPIO_initDigitalInput(Encoder_EncoderLeft2_IOMUX);
+    DL_GPIO_initDigitalInputFeatures(Encoder_EncoderLeft2_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_DOWN,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
-    DL_GPIO_initDigitalInput(Encoder_EncoderRight1_IOMUX);
+    DL_GPIO_initDigitalInputFeatures(Encoder_EncoderRight1_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_DOWN,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
-    DL_GPIO_initDigitalInput(Encoder_EncoderRight2_IOMUX);
+    DL_GPIO_initDigitalInputFeatures(Encoder_EncoderRight2_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_DOWN,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
     DL_GPIO_initDigitalOutput(MPU_MPUSCL_IOMUX);
 
     DL_GPIO_initDigitalOutput(MPU_MPUSDA_IOMUX);
 
-    DL_GPIO_clearPins(GPIOA, OLED_OLEDSDA_PIN |
+    DL_GPIO_initDigitalInputFeatures(Key_Key1_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+
+    DL_GPIO_initDigitalInputFeatures(Key_Key2_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+
+    DL_GPIO_initDigitalInputFeatures(Key_Key3_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+
+    DL_GPIO_initDigitalInputFeatures(Key_Key4_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+
+    DL_GPIO_initDigitalInputFeatures(Key_Key5_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+
+    DL_GPIO_clearPins(GPIOA, LED_PIN_0_PIN |
+		MotorIN_LeftIN1_PIN |
+		MotorIN_LeftIN2_PIN |
+		MotorIN_RightIN1_PIN |
+		MotorIN_RightIN2_PIN);
+    DL_GPIO_setPins(GPIOA, Buzzer_Buzzer1_PIN |
+		OLED_OLEDSDA_PIN |
+		OLED_OLEDSCL_PIN |
+		MPU_MPUSCL_PIN |
+		MPU_MPUSDA_PIN);
+    DL_GPIO_enableOutput(GPIOA, LED_PIN_0_PIN |
+		Buzzer_Buzzer1_PIN |
+		OLED_OLEDSDA_PIN |
 		OLED_OLEDSCL_PIN |
 		MotorIN_LeftIN1_PIN |
 		MotorIN_LeftIN2_PIN |
+		MotorIN_RightIN1_PIN |
+		MotorIN_RightIN2_PIN |
 		MPU_MPUSCL_PIN |
 		MPU_MPUSDA_PIN);
-    DL_GPIO_enableOutput(GPIOA, OLED_OLEDSDA_PIN |
-		OLED_OLEDSCL_PIN |
-		MotorIN_LeftIN1_PIN |
-		MotorIN_LeftIN2_PIN |
-		MPU_MPUSCL_PIN |
-		MPU_MPUSDA_PIN);
-    DL_GPIO_setLowerPinsPolarity(GPIOA, DL_GPIO_PIN_12_EDGE_RISE_FALL |
-		DL_GPIO_PIN_13_EDGE_RISE_FALL |
-		DL_GPIO_PIN_14_EDGE_RISE_FALL |
-		DL_GPIO_PIN_15_EDGE_RISE_FALL);
-    DL_GPIO_clearInterruptStatus(GPIOA, Encoder_EncoderLeft1_PIN |
+    DL_GPIO_setUpperPinsPolarity(Encoder_PORT, DL_GPIO_PIN_18_EDGE_RISE_FALL |
+		DL_GPIO_PIN_19_EDGE_RISE_FALL |
+		DL_GPIO_PIN_20_EDGE_RISE_FALL |
+		DL_GPIO_PIN_24_EDGE_RISE_FALL);
+    DL_GPIO_clearInterruptStatus(Encoder_PORT, Encoder_EncoderLeft1_PIN |
 		Encoder_EncoderLeft2_PIN |
 		Encoder_EncoderRight1_PIN |
 		Encoder_EncoderRight2_PIN);
-    DL_GPIO_enableInterrupt(GPIOA, Encoder_EncoderLeft1_PIN |
+    DL_GPIO_enableInterrupt(Encoder_PORT, Encoder_EncoderLeft1_PIN |
 		Encoder_EncoderLeft2_PIN |
 		Encoder_EncoderRight1_PIN |
 		Encoder_EncoderRight2_PIN);
-    DL_GPIO_clearPins(GPIOB, MotorIN_RightIN1_PIN |
-		MotorIN_RightIN2_PIN);
-    DL_GPIO_enableOutput(GPIOB, MotorIN_RightIN1_PIN |
-		MotorIN_RightIN2_PIN);
 
 }
 
@@ -185,6 +228,8 @@ SYSCONFIG_WEAK void SYSCFG_DL_SYSCTL_init(void)
 	DL_SYSCTL_disableHFXT();
 	DL_SYSCTL_disableSYSPLL();
     DL_SYSCTL_enableMFCLK();
+    /* INT_GROUP1 Priority */
+    NVIC_SetPriority(GPIOB_INT_IRQn, 1);
 
 }
 
@@ -279,12 +324,12 @@ SYSCONFIG_WEAK void SYSCFG_DL_Timer_init(void) {
 
 
 
-static const DL_UART_Main_ClockConfig gOpenMVSerialClockConfig = {
+static const DL_UART_Main_ClockConfig gBluetoothClockConfig = {
     .clockSel    = DL_UART_MAIN_CLOCK_MFCLK,
     .divideRatio = DL_UART_MAIN_CLOCK_DIVIDE_RATIO_1
 };
 
-static const DL_UART_Main_Config gOpenMVSerialConfig = {
+static const DL_UART_Main_Config gBluetoothConfig = {
     .mode        = DL_UART_MAIN_MODE_NORMAL,
     .direction   = DL_UART_MAIN_DIRECTION_TX_RX,
     .flowControl = DL_UART_MAIN_FLOW_CONTROL_NONE,
@@ -293,28 +338,28 @@ static const DL_UART_Main_Config gOpenMVSerialConfig = {
     .stopBits    = DL_UART_MAIN_STOP_BITS_ONE
 };
 
-SYSCONFIG_WEAK void SYSCFG_DL_OpenMVSerial_init(void)
+SYSCONFIG_WEAK void SYSCFG_DL_Bluetooth_init(void)
 {
-    DL_UART_Main_setClockConfig(OpenMVSerial_INST, (DL_UART_Main_ClockConfig *) &gOpenMVSerialClockConfig);
+    DL_UART_Main_setClockConfig(Bluetooth_INST, (DL_UART_Main_ClockConfig *) &gBluetoothClockConfig);
 
-    DL_UART_Main_init(OpenMVSerial_INST, (DL_UART_Main_Config *) &gOpenMVSerialConfig);
+    DL_UART_Main_init(Bluetooth_INST, (DL_UART_Main_Config *) &gBluetoothConfig);
     /*
      * Configure baud rate by setting oversampling and baud rate divisors.
      *  Target baud rate: 9600
      *  Actual baud rate: 9598.08
      */
-    DL_UART_Main_setOversampling(OpenMVSerial_INST, DL_UART_OVERSAMPLING_RATE_16X);
-    DL_UART_Main_setBaudRateDivisor(OpenMVSerial_INST, OpenMVSerial_IBRD_4_MHZ_9600_BAUD, OpenMVSerial_FBRD_4_MHZ_9600_BAUD);
+    DL_UART_Main_setOversampling(Bluetooth_INST, DL_UART_OVERSAMPLING_RATE_16X);
+    DL_UART_Main_setBaudRateDivisor(Bluetooth_INST, Bluetooth_IBRD_4_MHZ_9600_BAUD, Bluetooth_FBRD_4_MHZ_9600_BAUD);
 
 
     /* Configure Interrupts */
-    DL_UART_Main_enableInterrupt(OpenMVSerial_INST,
+    DL_UART_Main_enableInterrupt(Bluetooth_INST,
                                  DL_UART_MAIN_INTERRUPT_RX);
     /* Setting the Interrupt Priority */
-    NVIC_SetPriority(OpenMVSerial_INST_INT_IRQN, 1);
+    NVIC_SetPriority(Bluetooth_INST_INT_IRQN, 1);
 
 
-    DL_UART_Main_enable(OpenMVSerial_INST);
+    DL_UART_Main_enable(Bluetooth_INST);
 }
 
 /* infraredADC Initialization */
@@ -329,26 +374,31 @@ SYSCONFIG_WEAK void SYSCFG_DL_infraredADC_init(void)
 
     DL_ADC12_initSeqSample(infraredADC_INST,
         DL_ADC12_REPEAT_MODE_ENABLED, DL_ADC12_SAMPLING_SOURCE_AUTO, DL_ADC12_TRIG_SRC_SOFTWARE,
-        DL_ADC12_SEQ_START_ADDR_01, DL_ADC12_SEQ_END_ADDR_03, DL_ADC12_SAMP_CONV_RES_12_BIT,
+        DL_ADC12_SEQ_START_ADDR_00, DL_ADC12_SEQ_END_ADDR_02, DL_ADC12_SAMP_CONV_RES_12_BIT,
         DL_ADC12_SAMP_CONV_DATA_FORMAT_UNSIGNED);
     DL_ADC12_configConversionMem(infraredADC_INST, infraredADC_ADCMEM_infraredLeft,
-        DL_ADC12_INPUT_CHAN_1, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
+        DL_ADC12_INPUT_CHAN_0, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
         DL_ADC12_BURN_OUT_SOURCE_DISABLED, DL_ADC12_TRIGGER_MODE_AUTO_NEXT, DL_ADC12_WINDOWS_COMP_MODE_DISABLED);
     DL_ADC12_configConversionMem(infraredADC_INST, infraredADC_ADCMEM_infraredCenter,
-        DL_ADC12_INPUT_CHAN_2, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
+        DL_ADC12_INPUT_CHAN_1, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
         DL_ADC12_BURN_OUT_SOURCE_DISABLED, DL_ADC12_TRIGGER_MODE_AUTO_NEXT, DL_ADC12_WINDOWS_COMP_MODE_DISABLED);
     DL_ADC12_configConversionMem(infraredADC_INST, infraredADC_ADCMEM_infraredRight,
-        DL_ADC12_INPUT_CHAN_3, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
+        DL_ADC12_INPUT_CHAN_2, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
         DL_ADC12_BURN_OUT_SOURCE_DISABLED, DL_ADC12_TRIGGER_MODE_AUTO_NEXT, DL_ADC12_WINDOWS_COMP_MODE_DISABLED);
     DL_ADC12_setSampleTime0(infraredADC_INST,400);
     /* Enable ADC12 interrupt */
-    DL_ADC12_clearInterruptStatus(infraredADC_INST,(DL_ADC12_INTERRUPT_MEM1_RESULT_LOADED
-		 | DL_ADC12_INTERRUPT_MEM2_RESULT_LOADED
-		 | DL_ADC12_INTERRUPT_MEM3_RESULT_LOADED));
-    DL_ADC12_enableInterrupt(infraredADC_INST,(DL_ADC12_INTERRUPT_MEM1_RESULT_LOADED
-		 | DL_ADC12_INTERRUPT_MEM2_RESULT_LOADED
-		 | DL_ADC12_INTERRUPT_MEM3_RESULT_LOADED));
+    DL_ADC12_clearInterruptStatus(infraredADC_INST,(DL_ADC12_INTERRUPT_MEM2_RESULT_LOADED));
+    DL_ADC12_enableInterrupt(infraredADC_INST,(DL_ADC12_INTERRUPT_MEM2_RESULT_LOADED));
     NVIC_SetPriority(infraredADC_INST_INT_IRQN, 1);
     DL_ADC12_enableConversions(infraredADC_INST);
+}
+
+SYSCONFIG_WEAK void SYSCFG_DL_SYSTICK_init(void)
+{
+    /*
+     * Initializes the SysTick period to 1.00 ms,
+     * enables the interrupt, and starts the SysTick Timer
+     */
+    DL_SYSTICK_config(32000);
 }
 

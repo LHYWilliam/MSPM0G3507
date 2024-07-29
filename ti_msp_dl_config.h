@@ -105,21 +105,21 @@ extern "C" {
 
 
 
-/* Defines for OpenMVSerial */
-#define OpenMVSerial_INST                                                  UART1
-#define OpenMVSerial_INST_IRQHandler                            UART1_IRQHandler
-#define OpenMVSerial_INST_INT_IRQN                                UART1_INT_IRQn
-#define GPIO_OpenMVSerial_RX_PORT                                          GPIOB
-#define GPIO_OpenMVSerial_TX_PORT                                          GPIOB
-#define GPIO_OpenMVSerial_RX_PIN                                   DL_GPIO_PIN_7
-#define GPIO_OpenMVSerial_TX_PIN                                   DL_GPIO_PIN_6
-#define GPIO_OpenMVSerial_IOMUX_RX                               (IOMUX_PINCM24)
-#define GPIO_OpenMVSerial_IOMUX_TX                               (IOMUX_PINCM23)
-#define GPIO_OpenMVSerial_IOMUX_RX_FUNC                IOMUX_PINCM24_PF_UART1_RX
-#define GPIO_OpenMVSerial_IOMUX_TX_FUNC                IOMUX_PINCM23_PF_UART1_TX
-#define OpenMVSerial_BAUD_RATE                                            (9600)
-#define OpenMVSerial_IBRD_4_MHZ_9600_BAUD                                   (26)
-#define OpenMVSerial_FBRD_4_MHZ_9600_BAUD                                    (3)
+/* Defines for Bluetooth */
+#define Bluetooth_INST                                                     UART1
+#define Bluetooth_INST_IRQHandler                               UART1_IRQHandler
+#define Bluetooth_INST_INT_IRQN                                   UART1_INT_IRQn
+#define GPIO_Bluetooth_RX_PORT                                             GPIOB
+#define GPIO_Bluetooth_TX_PORT                                             GPIOB
+#define GPIO_Bluetooth_RX_PIN                                      DL_GPIO_PIN_7
+#define GPIO_Bluetooth_TX_PIN                                      DL_GPIO_PIN_6
+#define GPIO_Bluetooth_IOMUX_RX                                  (IOMUX_PINCM24)
+#define GPIO_Bluetooth_IOMUX_TX                                  (IOMUX_PINCM23)
+#define GPIO_Bluetooth_IOMUX_RX_FUNC                   IOMUX_PINCM24_PF_UART1_RX
+#define GPIO_Bluetooth_IOMUX_TX_FUNC                   IOMUX_PINCM23_PF_UART1_TX
+#define Bluetooth_BAUD_RATE                                               (9600)
+#define Bluetooth_IBRD_4_MHZ_9600_BAUD                                      (26)
+#define Bluetooth_FBRD_4_MHZ_9600_BAUD                                       (3)
 
 
 
@@ -129,80 +129,111 @@ extern "C" {
 #define infraredADC_INST                                                    ADC1
 #define infraredADC_INST_IRQHandler                              ADC1_IRQHandler
 #define infraredADC_INST_INT_IRQN                                (ADC1_INT_IRQn)
-#define infraredADC_ADCMEM_infraredLeft                       DL_ADC12_MEM_IDX_1
+#define infraredADC_ADCMEM_infraredLeft                       DL_ADC12_MEM_IDX_0
 #define infraredADC_ADCMEM_infraredLeft_REF         DL_ADC12_REFERENCE_VOLTAGE_VDDA
 #define infraredADC_ADCMEM_infraredLeft_REF_VOLTAGE_V                                     3.3
-#define infraredADC_ADCMEM_infraredCenter                      DL_ADC12_MEM_IDX_2
+#define infraredADC_ADCMEM_infraredCenter                      DL_ADC12_MEM_IDX_1
 #define infraredADC_ADCMEM_infraredCenter_REF         DL_ADC12_REFERENCE_VOLTAGE_VDDA
 #define infraredADC_ADCMEM_infraredCenter_REF_VOLTAGE_V                                     3.3
-#define infraredADC_ADCMEM_infraredRight                      DL_ADC12_MEM_IDX_3
+#define infraredADC_ADCMEM_infraredRight                      DL_ADC12_MEM_IDX_2
 #define infraredADC_ADCMEM_infraredRight_REF         DL_ADC12_REFERENCE_VOLTAGE_VDDA
 #define infraredADC_ADCMEM_infraredRight_REF_VOLTAGE_V                                     3.3
+#define GPIO_infraredADC_C0_PORT                                           GPIOA
+#define GPIO_infraredADC_C0_PIN                                   DL_GPIO_PIN_15
 #define GPIO_infraredADC_C1_PORT                                           GPIOA
 #define GPIO_infraredADC_C1_PIN                                   DL_GPIO_PIN_16
 #define GPIO_infraredADC_C2_PORT                                           GPIOA
 #define GPIO_infraredADC_C2_PIN                                   DL_GPIO_PIN_17
-#define GPIO_infraredADC_C3_PORT                                           GPIOA
-#define GPIO_infraredADC_C3_PIN                                   DL_GPIO_PIN_18
 
 
 
+/* Port definition for Pin Group LED */
+#define LED_PORT                                                         (GPIOA)
+
+/* Defines for PIN_0: GPIOA.2 with pinCMx 7 on package pin 42 */
+#define LED_PIN_0_PIN                                            (DL_GPIO_PIN_2)
+#define LED_PIN_0_IOMUX                                           (IOMUX_PINCM7)
+/* Port definition for Pin Group Buzzer */
+#define Buzzer_PORT                                                      (GPIOA)
+
+/* Defines for Buzzer1: GPIOA.7 with pinCMx 14 on package pin 49 */
+#define Buzzer_Buzzer1_PIN                                       (DL_GPIO_PIN_7)
+#define Buzzer_Buzzer1_IOMUX                                     (IOMUX_PINCM14)
 /* Port definition for Pin Group OLED */
 #define OLED_PORT                                                        (GPIOA)
 
-/* Defines for OLEDSDA: GPIOA.31 with pinCMx 6 on package pin 39 */
-#define OLED_OLEDSDA_PIN                                        (DL_GPIO_PIN_31)
-#define OLED_OLEDSDA_IOMUX                                        (IOMUX_PINCM6)
-/* Defines for OLEDSCL: GPIOA.28 with pinCMx 3 on package pin 35 */
-#define OLED_OLEDSCL_PIN                                        (DL_GPIO_PIN_28)
-#define OLED_OLEDSCL_IOMUX                                        (IOMUX_PINCM3)
-/* Defines for LeftIN1: GPIOA.25 with pinCMx 55 on package pin 26 */
-#define MotorIN_LeftIN1_PORT                                             (GPIOA)
-#define MotorIN_LeftIN1_PIN                                     (DL_GPIO_PIN_25)
-#define MotorIN_LeftIN1_IOMUX                                    (IOMUX_PINCM55)
-/* Defines for LeftIN2: GPIOA.26 with pinCMx 59 on package pin 30 */
-#define MotorIN_LeftIN2_PORT                                             (GPIOA)
-#define MotorIN_LeftIN2_PIN                                     (DL_GPIO_PIN_26)
-#define MotorIN_LeftIN2_IOMUX                                    (IOMUX_PINCM59)
-/* Defines for RightIN1: GPIOB.8 with pinCMx 25 on package pin 60 */
-#define MotorIN_RightIN1_PORT                                            (GPIOB)
-#define MotorIN_RightIN1_PIN                                     (DL_GPIO_PIN_8)
-#define MotorIN_RightIN1_IOMUX                                   (IOMUX_PINCM25)
-/* Defines for RightIN2: GPIOB.9 with pinCMx 26 on package pin 61 */
-#define MotorIN_RightIN2_PORT                                            (GPIOB)
-#define MotorIN_RightIN2_PIN                                     (DL_GPIO_PIN_9)
-#define MotorIN_RightIN2_IOMUX                                   (IOMUX_PINCM26)
-/* Port definition for Pin Group Encoder */
-#define Encoder_PORT                                                     (GPIOA)
+/* Defines for OLEDSDA: GPIOA.28 with pinCMx 3 on package pin 35 */
+#define OLED_OLEDSDA_PIN                                        (DL_GPIO_PIN_28)
+#define OLED_OLEDSDA_IOMUX                                        (IOMUX_PINCM3)
+/* Defines for OLEDSCL: GPIOA.31 with pinCMx 6 on package pin 39 */
+#define OLED_OLEDSCL_PIN                                        (DL_GPIO_PIN_31)
+#define OLED_OLEDSCL_IOMUX                                        (IOMUX_PINCM6)
+/* Port definition for Pin Group MotorIN */
+#define MotorIN_PORT                                                     (GPIOA)
 
-/* Defines for EncoderLeft1: GPIOA.12 with pinCMx 34 on package pin 5 */
+/* Defines for LeftIN1: GPIOA.24 with pinCMx 54 on package pin 25 */
+#define MotorIN_LeftIN1_PIN                                     (DL_GPIO_PIN_24)
+#define MotorIN_LeftIN1_IOMUX                                    (IOMUX_PINCM54)
+/* Defines for LeftIN2: GPIOA.25 with pinCMx 55 on package pin 26 */
+#define MotorIN_LeftIN2_PIN                                     (DL_GPIO_PIN_25)
+#define MotorIN_LeftIN2_IOMUX                                    (IOMUX_PINCM55)
+/* Defines for RightIN1: GPIOA.26 with pinCMx 59 on package pin 30 */
+#define MotorIN_RightIN1_PIN                                    (DL_GPIO_PIN_26)
+#define MotorIN_RightIN1_IOMUX                                   (IOMUX_PINCM59)
+/* Defines for RightIN2: GPIOA.27 with pinCMx 60 on package pin 31 */
+#define MotorIN_RightIN2_PIN                                    (DL_GPIO_PIN_27)
+#define MotorIN_RightIN2_IOMUX                                   (IOMUX_PINCM60)
+/* Port definition for Pin Group Encoder */
+#define Encoder_PORT                                                     (GPIOB)
+
+/* Defines for EncoderLeft1: GPIOB.18 with pinCMx 44 on package pin 15 */
 // pins affected by this interrupt request:["EncoderLeft1","EncoderLeft2","EncoderRight1","EncoderRight2"]
-#define Encoder_INT_IRQN                                        (GPIOA_INT_IRQn)
-#define Encoder_INT_IIDX                        (DL_INTERRUPT_GROUP1_IIDX_GPIOA)
-#define Encoder_EncoderLeft1_IIDX                           (DL_GPIO_IIDX_DIO12)
-#define Encoder_EncoderLeft1_PIN                                (DL_GPIO_PIN_12)
-#define Encoder_EncoderLeft1_IOMUX                               (IOMUX_PINCM34)
-/* Defines for EncoderLeft2: GPIOA.13 with pinCMx 35 on package pin 6 */
-#define Encoder_EncoderLeft2_IIDX                           (DL_GPIO_IIDX_DIO13)
-#define Encoder_EncoderLeft2_PIN                                (DL_GPIO_PIN_13)
-#define Encoder_EncoderLeft2_IOMUX                               (IOMUX_PINCM35)
-/* Defines for EncoderRight1: GPIOA.14 with pinCMx 36 on package pin 7 */
-#define Encoder_EncoderRight1_IIDX                          (DL_GPIO_IIDX_DIO14)
-#define Encoder_EncoderRight1_PIN                               (DL_GPIO_PIN_14)
-#define Encoder_EncoderRight1_IOMUX                              (IOMUX_PINCM36)
-/* Defines for EncoderRight2: GPIOA.15 with pinCMx 37 on package pin 8 */
-#define Encoder_EncoderRight2_IIDX                          (DL_GPIO_IIDX_DIO15)
-#define Encoder_EncoderRight2_PIN                               (DL_GPIO_PIN_15)
-#define Encoder_EncoderRight2_IOMUX                              (IOMUX_PINCM37)
+#define Encoder_INT_IRQN                                        (GPIOB_INT_IRQn)
+#define Encoder_INT_IIDX                        (DL_INTERRUPT_GROUP1_IIDX_GPIOB)
+#define Encoder_EncoderLeft1_IIDX                           (DL_GPIO_IIDX_DIO18)
+#define Encoder_EncoderLeft1_PIN                                (DL_GPIO_PIN_18)
+#define Encoder_EncoderLeft1_IOMUX                               (IOMUX_PINCM44)
+/* Defines for EncoderLeft2: GPIOB.19 with pinCMx 45 on package pin 16 */
+#define Encoder_EncoderLeft2_IIDX                           (DL_GPIO_IIDX_DIO19)
+#define Encoder_EncoderLeft2_PIN                                (DL_GPIO_PIN_19)
+#define Encoder_EncoderLeft2_IOMUX                               (IOMUX_PINCM45)
+/* Defines for EncoderRight1: GPIOB.20 with pinCMx 48 on package pin 19 */
+#define Encoder_EncoderRight1_IIDX                          (DL_GPIO_IIDX_DIO20)
+#define Encoder_EncoderRight1_PIN                               (DL_GPIO_PIN_20)
+#define Encoder_EncoderRight1_IOMUX                              (IOMUX_PINCM48)
+/* Defines for EncoderRight2: GPIOB.24 with pinCMx 52 on package pin 23 */
+#define Encoder_EncoderRight2_IIDX                          (DL_GPIO_IIDX_DIO24)
+#define Encoder_EncoderRight2_PIN                               (DL_GPIO_PIN_24)
+#define Encoder_EncoderRight2_IOMUX                              (IOMUX_PINCM52)
 /* Port definition for Pin Group MPU */
 #define MPU_PORT                                                         (GPIOA)
 
-/* Defines for MPUSCL: GPIOA.0 with pinCMx 1 on package pin 33 */
-#define MPU_MPUSCL_PIN                                           (DL_GPIO_PIN_0)
-#define MPU_MPUSCL_IOMUX                                          (IOMUX_PINCM1)
-/* Defines for MPUSDA: GPIOA.1 with pinCMx 2 on package pin 34 */
-#define MPU_MPUSDA_PIN                                           (DL_GPIO_PIN_1)
-#define MPU_MPUSDA_IOMUX                                          (IOMUX_PINCM2)
+/* Defines for MPUSCL: GPIOA.1 with pinCMx 2 on package pin 34 */
+#define MPU_MPUSCL_PIN                                           (DL_GPIO_PIN_1)
+#define MPU_MPUSCL_IOMUX                                          (IOMUX_PINCM2)
+/* Defines for MPUSDA: GPIOA.0 with pinCMx 1 on package pin 33 */
+#define MPU_MPUSDA_PIN                                           (DL_GPIO_PIN_0)
+#define MPU_MPUSDA_IOMUX                                          (IOMUX_PINCM1)
+/* Port definition for Pin Group Key */
+#define Key_PORT                                                         (GPIOA)
+
+/* Defines for Key1: GPIOA.12 with pinCMx 34 on package pin 5 */
+#define Key_Key1_PIN                                            (DL_GPIO_PIN_12)
+#define Key_Key1_IOMUX                                           (IOMUX_PINCM34)
+/* Defines for Key2: GPIOA.13 with pinCMx 35 on package pin 6 */
+#define Key_Key2_PIN                                            (DL_GPIO_PIN_13)
+#define Key_Key2_IOMUX                                           (IOMUX_PINCM35)
+/* Defines for Key3: GPIOA.14 with pinCMx 36 on package pin 7 */
+#define Key_Key3_PIN                                            (DL_GPIO_PIN_14)
+#define Key_Key3_IOMUX                                           (IOMUX_PINCM36)
+/* Defines for Key4: GPIOA.22 with pinCMx 47 on package pin 18 */
+#define Key_Key4_PIN                                            (DL_GPIO_PIN_22)
+#define Key_Key4_IOMUX                                           (IOMUX_PINCM47)
+/* Defines for Key5: GPIOA.23 with pinCMx 53 on package pin 24 */
+#define Key_Key5_PIN                                            (DL_GPIO_PIN_23)
+#define Key_Key5_IOMUX                                           (IOMUX_PINCM53)
+
+
 
 /* clang-format on */
 
@@ -212,9 +243,10 @@ void SYSCFG_DL_GPIO_init(void);
 void SYSCFG_DL_SYSCTL_init(void);
 void SYSCFG_DL_MotorPWM_init(void);
 void SYSCFG_DL_Timer_init(void);
-void SYSCFG_DL_OpenMVSerial_init(void);
+void SYSCFG_DL_Bluetooth_init(void);
 void SYSCFG_DL_infraredADC_init(void);
 
+void SYSCFG_DL_SYSTICK_init(void);
 
 bool SYSCFG_DL_saveConfiguration(void);
 bool SYSCFG_DL_restoreConfiguration(void);
