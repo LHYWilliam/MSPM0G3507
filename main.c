@@ -37,14 +37,14 @@
 #include "motor.h"
 #include "delay.h"
 
-Serial OpenMVSerial = {
-	.uart = OpenMVSerial_INST,
+Serial BluetoothSerial = {
+	.uart = Bluetooth_INST,
 };
 
 Motor motorLeft = {
-	.IN1_gpio = MotorIN_LeftIN1_PORT,
+	.IN1_gpio = MotorIN_PORT,
 	.IN1_pins = MotorIN_LeftIN1_PIN,
-	.IN2_gpio = MotorIN_LeftIN2_PORT,
+	.IN2_gpio = MotorIN_PORT,
 	.IN2_pins = MotorIN_LeftIN2_PIN,
 	.PWM = MotorPWM_INST,
 	.Index = GPIO_MotorPWM_C0_IDX,
@@ -52,9 +52,9 @@ Motor motorLeft = {
 };
 
 Motor motorRight = {
-	.IN1_gpio = MotorIN_RightIN1_PORT,
+	.IN1_gpio = MotorIN_PORT,
 	.IN1_pins = MotorIN_RightIN1_PIN,
-	.IN2_gpio = MotorIN_RightIN2_PORT,
+	.IN2_gpio = MotorIN_PORT,
 	.IN2_pins = MotorIN_RightIN2_PIN,
 	.PWM = MotorPWM_INST,
 	.Index = GPIO_MotorPWM_C1_IDX,
@@ -92,69 +92,129 @@ uint16_t turnTimer = DISABLE;
 void Serial_Praser(Serial *serial);
 void Serial_Handler(Serial *serial);
 
+uint16_t ADCValue[3];
+int16_t encoderLeft, encoderRight;
+
+int16_t speedLeft, speedRight;
+uint16_t infraredLeft, infraredCener, infraredRight;
+
 int main(void)
 {
     SYSCFG_DL_init();
 	
-	Delay_ms(2500);
-	
 	OLED_Init();
-	Serial_init(&OpenMVSerial);
+	Serial_init(&BluetoothSerial);
 	
-	NVIC_ClearPendingIRQ(OpenMVSerial_INST_INT_IRQN);
-	NVIC_EnableIRQ(OpenMVSerial_INST_INT_IRQN);
+	NVIC_ClearPendingIRQ(Bluetooth_INST_INT_IRQN);
+	NVIC_EnableIRQ(Bluetooth_INST_INT_IRQN);
+	
+	NVIC_ClearPendingIRQ(infraredADC_INST_INT_IRQN);
+	NVIC_EnableIRQ(infraredADC_INST_INT_IRQN);
+	
+	NVIC_ClearPendingIRQ(Encoder_INT_IRQN);
+	NVIC_EnableIRQ(Encoder_INT_IRQN);
 	
 	NVIC_ClearPendingIRQ(Timer_INST_INT_IRQN);
     NVIC_EnableIRQ(Timer_INST_INT_IRQN);
 	
     while (1) {
-		OLED_ShowString(1, 1, "Action:         ");
-        OLED_ShowString(1, 8, action == Turn ? directionString[direction]
-                                             : actionString[action]);
-        OLED_ShowSignedNum(2, 6, AdvancediffSpeed, 5);
+		
     }
 }
 
 void Timer_INST_IRQHandler(void) {
     if(DL_TimerG_getPendingInterrupt(Timer_INST) == DL_TIMER_IIDX_ZERO) {
-		switch (action) {
-        case Stop:
-            Motor_set(&motorLeft, 0);
-            Motor_set(&motorRight, 0);
-            break;
-
-        case Advance:
-            Motor_set(&motorLeft, advanceBaseSpeed - AdvancediffSpeed);
-            Motor_set(&motorRight, advanceBaseSpeed + AdvancediffSpeed);
-            break;
-
-        case Turn:
-            if (turnTimer) {
-                Motor_set(&motorLeft, -turnDiffSpeed);
-                Motor_set(&motorRight, +turnDiffSpeed);
-
-                turnTimer += 10;
-                if (turnTimer > turnTime) {
-                    action = Stop;
-                    turnTimer = DISABLE;
-                }
-            }
-            break;
-
-        case Round:
-            Motor_set(&motorLeft, -turnDiffSpeed);
-            Motor_set(&motorRight, +turnDiffSpeed);
-            break;
-        }
+		DL_ADC12_startConversion(infraredADC_INST);
+		
+		speedLeft = encoderLeft;
+		encoderLeft = 0;
+		speedRight = encoderRight;
+		encoderRight = 0;
+		
     }
 }
 
-void OpenMVSerial_INST_IRQHandler(void) {
-  if (DL_UART_Main_getPendingInterrupt(OpenMVSerial.uart) == DL_UART_IIDX_RX) {
-        Serial_Praser(&OpenMVSerial);
-        Serial_Handler(&OpenMVSerial);
+void Bluetooth_INST_IRQHandler(void) {
+  if (DL_UART_Main_getPendingInterrupt(BluetoothSerial.uart) == DL_UART_IIDX_RX) {
+        Serial_Praser(&BluetoothSerial);
+        Serial_Handler(&BluetoothSerial);
   }
 }
+
+void infraredADC_INST_IRQHandler(void) {
+	if (DL_ADC12_getPendingInterrupt(infraredADC_INST) == DL_ADC12_IIDX_MEM2_RESULT_LOADED) {
+        infraredLeft = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredLeft);  
+		infraredCener = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredCenter);
+		infraredRight = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredRight);		
+     }
+}
+
+void GROUP1_IRQHandler(void) {
+    uint32_t INT_PIN = DL_GPIO_getEnabledInterruptStatus(Encoder_PORT, Encoder_EncoderLeft1_PIN | Encoder_EncoderLeft2_PIN | Encoder_EncoderRight1_PIN | Encoder_EncoderRight2_PIN);
+ 
+    if((INT_PIN & Encoder_EncoderLeft1_PIN) == Encoder_EncoderLeft1_PIN) {
+        if(DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft1_PIN) > 0) {
+			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft2_PIN) > 0) {
+				encoderLeft--;
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft2_PIN) == 0) {
+				encoderLeft++;
+			}
+		} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft1_PIN) == 0) {
+			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft2_PIN) > 0) {
+				encoderLeft++;
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft2_PIN) == 0) {
+				encoderLeft--;
+		       }
+		}
+		DL_GPIO_clearInterruptStatus(Encoder_PORT, Encoder_EncoderLeft1_PIN);
+    } else if((INT_PIN & Encoder_EncoderLeft2_PIN) == Encoder_EncoderLeft2_PIN) {
+		if(DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft2_PIN) > 0) {
+			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft1_PIN) > 0) {
+				encoderLeft++;
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft1_PIN) == 0) {
+				encoderLeft--;
+			}
+		} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft2_PIN) == 0) {
+			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft1_PIN) > 0) {
+				encoderLeft--;
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft1_PIN) == 0) {
+				encoderLeft++;
+		       }
+		}
+		DL_GPIO_clearInterruptStatus(Encoder_PORT, Encoder_EncoderLeft2_PIN);
+    } else if((INT_PIN & Encoder_EncoderRight1_PIN) == Encoder_EncoderRight1_PIN) {
+        if(DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight1_PIN) > 0) {
+			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight2_PIN) > 0) {
+				encoderRight--;
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight2_PIN) == 0) {
+				encoderRight++;
+			}
+		} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight1_PIN) == 0) {
+			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight2_PIN) > 0) {
+				encoderRight++;
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight2_PIN) == 0) {
+				encoderRight--;
+		       }
+		}
+		DL_GPIO_clearInterruptStatus(Encoder_PORT, Encoder_EncoderRight1_PIN);
+    } else if((INT_PIN & Encoder_EncoderRight2_PIN) == Encoder_EncoderRight2_PIN) {
+		if(DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight2_PIN) > 0) {
+			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight1_PIN) > 0) {
+				encoderRight++;
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight1_PIN) == 0) {
+				encoderRight--;
+			}
+		} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight2_PIN) == 0) {
+			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight1_PIN) > 0) {
+				encoderRight--;
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight1_PIN) == 0) {
+				encoderRight++;
+		       }
+		}
+		DL_GPIO_clearInterruptStatus(Encoder_PORT, Encoder_EncoderRight2_PIN);
+    }
+}
+
 
 void Serial_Praser(Serial *serial) {
     serial->ByteData = Serial_readByte(serial);
