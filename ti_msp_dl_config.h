@@ -191,10 +191,10 @@ extern "C" {
 #define Encoder_EncoderLeft2_IIDX                           (DL_GPIO_IIDX_DIO17)
 #define Encoder_EncoderLeft2_PIN                                (DL_GPIO_PIN_17)
 #define Encoder_EncoderLeft2_IOMUX                               (IOMUX_PINCM39)
-/* Defines for EncoderRight1: GPIOA.14 with pinCMx 36 on package pin 7 */
-#define Encoder_EncoderRight1_IIDX                          (DL_GPIO_IIDX_DIO14)
-#define Encoder_EncoderRight1_PIN                               (DL_GPIO_PIN_14)
-#define Encoder_EncoderRight1_IOMUX                              (IOMUX_PINCM36)
+/* Defines for EncoderRight1: GPIOA.23 with pinCMx 53 on package pin 24 */
+#define Encoder_EncoderRight1_IIDX                          (DL_GPIO_IIDX_DIO23)
+#define Encoder_EncoderRight1_PIN                               (DL_GPIO_PIN_23)
+#define Encoder_EncoderRight1_IOMUX                              (IOMUX_PINCM53)
 /* Defines for EncoderRight2: GPIOA.22 with pinCMx 47 on package pin 18 */
 #define Encoder_EncoderRight2_IIDX                          (DL_GPIO_IIDX_DIO22)
 #define Encoder_EncoderRight2_PIN                               (DL_GPIO_PIN_22)

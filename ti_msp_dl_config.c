@@ -169,10 +169,14 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 		MotorIN_LeftIN2_PIN |
 		MPU_MPUSCL_PIN |
 		MPU_MPUSDA_PIN);
-    DL_GPIO_setLowerPinsPolarity(GPIOA, DL_GPIO_PIN_12_EDGE_RISE_FALL |
-		DL_GPIO_PIN_14_EDGE_RISE_FALL);
+    DL_GPIO_setLowerPinsPolarity(GPIOA, DL_GPIO_PIN_12_EDGE_RISE_FALL);
     DL_GPIO_setUpperPinsPolarity(GPIOA, DL_GPIO_PIN_17_EDGE_RISE_FALL |
+		DL_GPIO_PIN_23_EDGE_RISE_FALL |
 		DL_GPIO_PIN_22_EDGE_RISE_FALL);
+    DL_GPIO_setLowerPinsInputFilter(GPIOA, DL_GPIO_PIN_12_INPUT_FILTER_8_CYCLES);
+    DL_GPIO_setUpperPinsInputFilter(GPIOA, DL_GPIO_PIN_17_INPUT_FILTER_8_CYCLES |
+		DL_GPIO_PIN_23_INPUT_FILTER_8_CYCLES |
+		DL_GPIO_PIN_22_INPUT_FILTER_8_CYCLES);
     DL_GPIO_clearInterruptStatus(GPIOA, Encoder_EncoderLeft1_PIN |
 		Encoder_EncoderLeft2_PIN |
 		Encoder_EncoderRight1_PIN |
@@ -288,6 +292,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_taskTimer_init(void) {
     DL_TimerG_initTimerMode(taskTimer_INST,
         (DL_TimerG_TimerConfig *) &gtaskTimerTimerConfig);
     DL_TimerG_enableInterrupt(taskTimer_INST , DL_TIMERG_INTERRUPT_ZERO_EVENT);
+	NVIC_SetPriority(taskTimer_INST_INT_IRQN, 3);
     DL_TimerG_enableClock(taskTimer_INST);
 
 
