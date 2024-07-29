@@ -492,6 +492,71 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>MPU</GroupName>
+          <Files>
+            <File>
+              <FileName>dmp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mpu\dmp.c</FilePath>
+            </File>
+            <File>
+              <FileName>dmp.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\mpu\dmp.h</FilePath>
+            </File>
+            <File>
+              <FileName>dmpKey.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\mpu\dmpKey.h</FilePath>
+            </File>
+            <File>
+              <FileName>dmpmap.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\mpu\dmpmap.h</FilePath>
+            </File>
+            <File>
+              <FileName>inv_mpu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mpu\inv_mpu.c</FilePath>
+            </File>
+            <File>
+              <FileName>inv_mpu.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\mpu\inv_mpu.h</FilePath>
+            </File>
+            <File>
+              <FileName>inv_mpu_dmp_motion_driver.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mpu\inv_mpu_dmp_motion_driver.c</FilePath>
+            </File>
+            <File>
+              <FileName>inv_mpu_dmp_motion_driver.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\mpu\inv_mpu_dmp_motion_driver.h</FilePath>
+            </File>
+            <File>
+              <FileName>mpu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mpu\mpu.c</FilePath>
+            </File>
+            <File>
+              <FileName>mpu.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\mpu\mpu.h</FilePath>
+            </File>
+            <File>
+              <FileName>mpui2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mpu\mpui2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>mpui2c.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\mpu\mpui2c.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>Core</GroupName>
           <Files>
             <File>
