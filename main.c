@@ -37,6 +37,8 @@
 #include "motor.h"
 #include "delay.h"
 
+uint32_t ms = 0;
+
 Serial BluetoothSerial = {
 	.uart = Bluetooth_INST,
 };
@@ -98,9 +100,11 @@ int16_t encoderLeft, encoderRight;
 int16_t speedLeft, speedRight;
 uint16_t infraredLeft, infraredCener, infraredRight;
 
-int main(void)
-{
+int main(void) {
     SYSCFG_DL_init();
+	
+	NVIC_ClearPendingIRQ(msTimer_INST_INT_IRQN);
+	NVIC_EnableIRQ(msTimer_INST_INT_IRQN);
 	
 	OLED_Init();
 	Serial_init(&BluetoothSerial);
@@ -114,16 +118,22 @@ int main(void)
 	NVIC_ClearPendingIRQ(Encoder_INT_IRQN);
 	NVIC_EnableIRQ(Encoder_INT_IRQN);
 	
-	NVIC_ClearPendingIRQ(Timer_INST_INT_IRQN);
-    NVIC_EnableIRQ(Timer_INST_INT_IRQN);
+	NVIC_ClearPendingIRQ(taskTimer_INST_INT_IRQN);
+    NVIC_EnableIRQ(taskTimer_INST_INT_IRQN);
 	
     while (1) {
 		
     }
 }
 
-void Timer_INST_IRQHandler(void) {
-    if(DL_TimerG_getPendingInterrupt(Timer_INST) == DL_TIMER_IIDX_ZERO) {
+void msTimer_INST_IRQHandler(void) {
+	if(DL_TimerG_getPendingInterrupt(msTimer_INST) == DL_TIMER_IIDX_ZERO) {
+		ms++;
+    }
+}
+
+void taskTimer_INST_IRQHandler(void) {
+    if(DL_TimerG_getPendingInterrupt(taskTimer_INST) == DL_TIMER_IIDX_ZERO) {
 		DL_ADC12_startConversion(infraredADC_INST);
 		
 		speedLeft = encoderLeft;

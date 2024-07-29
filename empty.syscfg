@@ -8,24 +8,24 @@
 /**
  * Import the modules used in this configuration.
  */
-const ADC12   = scripting.addModule("/ti/driverlib/ADC12", {}, false);
-const ADC121  = ADC12.addInstance();
-const GPIO    = scripting.addModule("/ti/driverlib/GPIO", {}, false);
-const GPIO1   = GPIO.addInstance();
-const GPIO2   = GPIO.addInstance();
-const GPIO3   = GPIO.addInstance();
-const GPIO4   = GPIO.addInstance();
-const GPIO5   = GPIO.addInstance();
-const GPIO6   = GPIO.addInstance();
-const GPIO7   = GPIO.addInstance();
-const PWM     = scripting.addModule("/ti/driverlib/PWM", {}, false);
-const PWM1    = PWM.addInstance();
-const SYSCTL  = scripting.addModule("/ti/driverlib/SYSCTL");
-const SYSTICK = scripting.addModule("/ti/driverlib/SYSTICK");
-const TIMER   = scripting.addModule("/ti/driverlib/TIMER", {}, false);
-const TIMER1  = TIMER.addInstance();
-const UART    = scripting.addModule("/ti/driverlib/UART", {}, false);
-const UART1   = UART.addInstance();
+const ADC12  = scripting.addModule("/ti/driverlib/ADC12", {}, false);
+const ADC121 = ADC12.addInstance();
+const GPIO   = scripting.addModule("/ti/driverlib/GPIO", {}, false);
+const GPIO1  = GPIO.addInstance();
+const GPIO2  = GPIO.addInstance();
+const GPIO3  = GPIO.addInstance();
+const GPIO4  = GPIO.addInstance();
+const GPIO5  = GPIO.addInstance();
+const GPIO6  = GPIO.addInstance();
+const GPIO7  = GPIO.addInstance();
+const PWM    = scripting.addModule("/ti/driverlib/PWM", {}, false);
+const PWM1   = PWM.addInstance();
+const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
+const TIMER  = scripting.addModule("/ti/driverlib/TIMER", {}, false);
+const TIMER1 = TIMER.addInstance();
+const TIMER2 = TIMER.addInstance();
+const UART   = scripting.addModule("/ti/driverlib/UART", {}, false);
+const UART1  = UART.addInstance();
 
 /**
  * Write custom configuration values to the imported modules.
@@ -223,20 +223,24 @@ PWM1.ccp1PinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric1";
 SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.clockTreeEn           = true;
 
-SYSTICK.periodEnable      = true;
-SYSTICK.period            = 32000;
-SYSTICK.interruptEnable   = true;
-SYSTICK.interruptPriority = "0";
-SYSTICK.systickEnable     = true;
-
-TIMER1.$name              = "Timer";
 TIMER1.timerClkDiv        = 8;
 TIMER1.timerClkPrescale   = 100;
 TIMER1.timerMode          = "PERIODIC";
 TIMER1.timerPeriod        = "10 ms";
 TIMER1.timerStartTimer    = true;
 TIMER1.interrupts         = ["ZERO"];
+TIMER1.$name              = "taskTimer";
 TIMER1.peripheral.$assign = "TIMG0";
+
+TIMER2.$name              = "msTimer";
+TIMER2.timerClkDiv        = 8;
+TIMER2.timerClkPrescale   = 100;
+TIMER2.timerMode          = "PERIODIC";
+TIMER2.timerPeriod        = "1 ms";
+TIMER2.timerStartTimer    = true;
+TIMER2.interrupts         = ["ZERO"];
+TIMER2.interruptPriority  = "0";
+TIMER2.peripheral.$assign = "TIMG6";
 
 UART1.uartClkSrc                       = "MFCLK";
 UART1.enabledInterrupts                = ["RX"];

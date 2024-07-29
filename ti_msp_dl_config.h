@@ -97,11 +97,16 @@ extern "C" {
 
 
 
-/* Defines for Timer */
-#define Timer_INST                                                       (TIMG0)
-#define Timer_INST_IRQHandler                                   TIMG0_IRQHandler
-#define Timer_INST_INT_IRQN                                     (TIMG0_INT_IRQn)
-#define Timer_INST_LOAD_VALUE                                             (399U)
+/* Defines for taskTimer */
+#define taskTimer_INST                                                   (TIMG0)
+#define taskTimer_INST_IRQHandler                               TIMG0_IRQHandler
+#define taskTimer_INST_INT_IRQN                                 (TIMG0_INT_IRQn)
+#define taskTimer_INST_LOAD_VALUE                                         (399U)
+/* Defines for msTimer */
+#define msTimer_INST                                                     (TIMG6)
+#define msTimer_INST_IRQHandler                                 TIMG6_IRQHandler
+#define msTimer_INST_INT_IRQN                                   (TIMG6_INT_IRQn)
+#define msTimer_INST_LOAD_VALUE                                            (39U)
 
 
 
@@ -233,8 +238,6 @@ extern "C" {
 #define Key_Key5_PIN                                            (DL_GPIO_PIN_23)
 #define Key_Key5_IOMUX                                           (IOMUX_PINCM53)
 
-
-
 /* clang-format on */
 
 void SYSCFG_DL_init(void);
@@ -242,11 +245,11 @@ void SYSCFG_DL_initPower(void);
 void SYSCFG_DL_GPIO_init(void);
 void SYSCFG_DL_SYSCTL_init(void);
 void SYSCFG_DL_MotorPWM_init(void);
-void SYSCFG_DL_Timer_init(void);
+void SYSCFG_DL_taskTimer_init(void);
+void SYSCFG_DL_msTimer_init(void);
 void SYSCFG_DL_Bluetooth_init(void);
 void SYSCFG_DL_infraredADC_init(void);
 
-void SYSCFG_DL_SYSTICK_init(void);
 
 bool SYSCFG_DL_saveConfiguration(void);
 bool SYSCFG_DL_restoreConfiguration(void);

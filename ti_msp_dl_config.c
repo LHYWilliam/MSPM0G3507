@@ -41,6 +41,7 @@
 #include "ti_msp_dl_config.h"
 
 DL_TimerA_backupConfig gMotorPWMBackup;
+DL_TimerG_backupConfig gmsTimerBackup;
 
 /*
  *  ======== SYSCFG_DL_init ========
@@ -53,13 +54,13 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     /* Module-Specific Initializations*/
     SYSCFG_DL_SYSCTL_init();
     SYSCFG_DL_MotorPWM_init();
-    SYSCFG_DL_Timer_init();
+    SYSCFG_DL_taskTimer_init();
+    SYSCFG_DL_msTimer_init();
     SYSCFG_DL_Bluetooth_init();
     SYSCFG_DL_infraredADC_init();
-    SYSCFG_DL_SYSTICK_init();
     /* Ensure backup structures have no valid state */
 	gMotorPWMBackup.backupRdy 	= false;
-
+	gmsTimerBackup.backupRdy 	= false;
 
 
 }
@@ -72,6 +73,7 @@ SYSCONFIG_WEAK bool SYSCFG_DL_saveConfiguration(void)
     bool retStatus = true;
 
 	retStatus &= DL_TimerA_saveConfiguration(MotorPWM_INST, &gMotorPWMBackup);
+	retStatus &= DL_TimerG_saveConfiguration(msTimer_INST, &gmsTimerBackup);
 
     return retStatus;
 }
@@ -82,6 +84,7 @@ SYSCONFIG_WEAK bool SYSCFG_DL_restoreConfiguration(void)
     bool retStatus = true;
 
 	retStatus &= DL_TimerA_restoreConfiguration(MotorPWM_INST, &gMotorPWMBackup, false);
+	retStatus &= DL_TimerG_restoreConfiguration(msTimer_INST, &gmsTimerBackup, false);
 
     return retStatus;
 }
@@ -91,18 +94,18 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_GPIO_reset(GPIOA);
     DL_GPIO_reset(GPIOB);
     DL_TimerA_reset(MotorPWM_INST);
-    DL_TimerG_reset(Timer_INST);
+    DL_TimerG_reset(taskTimer_INST);
+    DL_TimerG_reset(msTimer_INST);
     DL_UART_Main_reset(Bluetooth_INST);
     DL_ADC12_reset(infraredADC_INST);
-
 
     DL_GPIO_enablePower(GPIOA);
     DL_GPIO_enablePower(GPIOB);
     DL_TimerA_enablePower(MotorPWM_INST);
-    DL_TimerG_enablePower(Timer_INST);
+    DL_TimerG_enablePower(taskTimer_INST);
+    DL_TimerG_enablePower(msTimer_INST);
     DL_UART_Main_enablePower(Bluetooth_INST);
     DL_ADC12_enablePower(infraredADC_INST);
-
     delay_cycles(POWER_STARTUP_DELAY);
 }
 
@@ -290,7 +293,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_MotorPWM_init(void) {
  * timerClkFreq = (timerClkSrc / (timerClkDivRatio * (timerClkPrescale + 1)))
  *   40000 Hz = 4000000 Hz / (8 * (99 + 1))
  */
-static const DL_TimerG_ClockConfig gTimerClockConfig = {
+static const DL_TimerG_ClockConfig gtaskTimerClockConfig = {
     .clockSel    = DL_TIMER_CLOCK_BUSCLK,
     .divideRatio = DL_TIMER_CLOCK_DIVIDE_8,
     .prescale    = 99U,
@@ -298,23 +301,61 @@ static const DL_TimerG_ClockConfig gTimerClockConfig = {
 
 /*
  * Timer load value (where the counter starts from) is calculated as (timerPeriod * timerClockFreq) - 1
- * Timer_INST_LOAD_VALUE = (10 ms * 40000 Hz) - 1
+ * taskTimer_INST_LOAD_VALUE = (10 ms * 40000 Hz) - 1
  */
-static const DL_TimerG_TimerConfig gTimerTimerConfig = {
-    .period     = Timer_INST_LOAD_VALUE,
+static const DL_TimerG_TimerConfig gtaskTimerTimerConfig = {
+    .period     = taskTimer_INST_LOAD_VALUE,
     .timerMode  = DL_TIMER_TIMER_MODE_PERIODIC,
     .startTimer = DL_TIMER_START,
 };
 
-SYSCONFIG_WEAK void SYSCFG_DL_Timer_init(void) {
+SYSCONFIG_WEAK void SYSCFG_DL_taskTimer_init(void) {
 
-    DL_TimerG_setClockConfig(Timer_INST,
-        (DL_TimerG_ClockConfig *) &gTimerClockConfig);
+    DL_TimerG_setClockConfig(taskTimer_INST,
+        (DL_TimerG_ClockConfig *) &gtaskTimerClockConfig);
 
-    DL_TimerG_initTimerMode(Timer_INST,
-        (DL_TimerG_TimerConfig *) &gTimerTimerConfig);
-    DL_TimerG_enableInterrupt(Timer_INST , DL_TIMERG_INTERRUPT_ZERO_EVENT);
-    DL_TimerG_enableClock(Timer_INST);
+    DL_TimerG_initTimerMode(taskTimer_INST,
+        (DL_TimerG_TimerConfig *) &gtaskTimerTimerConfig);
+    DL_TimerG_enableInterrupt(taskTimer_INST , DL_TIMERG_INTERRUPT_ZERO_EVENT);
+    DL_TimerG_enableClock(taskTimer_INST);
+
+
+
+
+
+}
+
+/*
+ * Timer clock configuration to be sourced by BUSCLK /  (4000000 Hz)
+ * timerClkFreq = (timerClkSrc / (timerClkDivRatio * (timerClkPrescale + 1)))
+ *   40000 Hz = 4000000 Hz / (8 * (99 + 1))
+ */
+static const DL_TimerG_ClockConfig gmsTimerClockConfig = {
+    .clockSel    = DL_TIMER_CLOCK_BUSCLK,
+    .divideRatio = DL_TIMER_CLOCK_DIVIDE_8,
+    .prescale    = 99U,
+};
+
+/*
+ * Timer load value (where the counter starts from) is calculated as (timerPeriod * timerClockFreq) - 1
+ * msTimer_INST_LOAD_VALUE = (1 ms * 40000 Hz) - 1
+ */
+static const DL_TimerG_TimerConfig gmsTimerTimerConfig = {
+    .period     = msTimer_INST_LOAD_VALUE,
+    .timerMode  = DL_TIMER_TIMER_MODE_PERIODIC,
+    .startTimer = DL_TIMER_START,
+};
+
+SYSCONFIG_WEAK void SYSCFG_DL_msTimer_init(void) {
+
+    DL_TimerG_setClockConfig(msTimer_INST,
+        (DL_TimerG_ClockConfig *) &gmsTimerClockConfig);
+
+    DL_TimerG_initTimerMode(msTimer_INST,
+        (DL_TimerG_TimerConfig *) &gmsTimerTimerConfig);
+    DL_TimerG_enableInterrupt(msTimer_INST , DL_TIMERG_INTERRUPT_ZERO_EVENT);
+	NVIC_SetPriority(msTimer_INST_INT_IRQN, 0);
+    DL_TimerG_enableClock(msTimer_INST);
 
 
 
@@ -391,14 +432,5 @@ SYSCONFIG_WEAK void SYSCFG_DL_infraredADC_init(void)
     DL_ADC12_enableInterrupt(infraredADC_INST,(DL_ADC12_INTERRUPT_MEM2_RESULT_LOADED));
     NVIC_SetPriority(infraredADC_INST_INT_IRQN, 1);
     DL_ADC12_enableConversions(infraredADC_INST);
-}
-
-SYSCONFIG_WEAK void SYSCFG_DL_SYSTICK_init(void)
-{
-    /*
-     * Initializes the SysTick period to 1.00 ms,
-     * enables the interrupt, and starts the SysTick Timer
-     */
-    DL_SYSTICK_config(32000);
 }
 
