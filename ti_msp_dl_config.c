@@ -171,11 +171,11 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 		MPU_MPUSDA_PIN);
     DL_GPIO_setLowerPinsPolarity(GPIOA, DL_GPIO_PIN_12_EDGE_RISE_FALL);
     DL_GPIO_setUpperPinsPolarity(GPIOA, DL_GPIO_PIN_17_EDGE_RISE_FALL |
-		DL_GPIO_PIN_23_EDGE_RISE_FALL |
+		DL_GPIO_PIN_24_EDGE_RISE_FALL |
 		DL_GPIO_PIN_22_EDGE_RISE_FALL);
     DL_GPIO_setLowerPinsInputFilter(GPIOA, DL_GPIO_PIN_12_INPUT_FILTER_8_CYCLES);
     DL_GPIO_setUpperPinsInputFilter(GPIOA, DL_GPIO_PIN_17_INPUT_FILTER_8_CYCLES |
-		DL_GPIO_PIN_23_INPUT_FILTER_8_CYCLES |
+		DL_GPIO_PIN_24_INPUT_FILTER_8_CYCLES |
 		DL_GPIO_PIN_22_INPUT_FILTER_8_CYCLES);
     DL_GPIO_clearInterruptStatus(GPIOA, Encoder_EncoderLeft1_PIN |
 		Encoder_EncoderLeft2_PIN |
@@ -373,7 +373,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_Bluetooth_init(void)
     DL_UART_Main_enableInterrupt(Bluetooth_INST,
                                  DL_UART_MAIN_INTERRUPT_RX);
     /* Setting the Interrupt Priority */
-    NVIC_SetPriority(Bluetooth_INST_INT_IRQN, 1);
+    NVIC_SetPriority(Bluetooth_INST_INT_IRQN, 0);
 
 
     DL_UART_Main_enable(Bluetooth_INST);
@@ -403,10 +403,6 @@ SYSCONFIG_WEAK void SYSCFG_DL_infraredADC_init(void)
         DL_ADC12_INPUT_CHAN_5, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
         DL_ADC12_BURN_OUT_SOURCE_DISABLED, DL_ADC12_TRIGGER_MODE_AUTO_NEXT, DL_ADC12_WINDOWS_COMP_MODE_DISABLED);
     DL_ADC12_setSampleTime0(infraredADC_INST,400);
-    /* Enable ADC12 interrupt */
-    DL_ADC12_clearInterruptStatus(infraredADC_INST,(DL_ADC12_INTERRUPT_MEM2_RESULT_LOADED));
-    DL_ADC12_enableInterrupt(infraredADC_INST,(DL_ADC12_INTERRUPT_MEM2_RESULT_LOADED));
-    NVIC_SetPriority(infraredADC_INST_INT_IRQN, 1);
     DL_ADC12_enableConversions(infraredADC_INST);
 }
 

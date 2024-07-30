@@ -122,7 +122,7 @@ char *lineString[] = {"OffLine", "OnLine", "OnCross"};
 void Serial_Praser(Serial *serial);
 void Serial_Handler(Serial *serial);
 
-float encoderToPWM = 7200. / 55.;
+float encoderLeftToPWM = 7200. / 56.5, encoderRightToPWM = 7200 / 54.;
 uint16_t infraredMax = 3850, infraredMaxCenter = 2500;
 uint16_t offLineInfrared = 1024, onLineInfrared = 3700, onCrossInfrared = 3800;
 uint16_t advanceBaseSpeed = 1024, turnBaseSpeed = 390, turnBaseTime = 1000,
@@ -134,9 +134,7 @@ uint16_t turnTime, turnTimer = DISABLE;
 int16_t speedLeft, speedRight;
 int16_t leftPIDOut, rightPIDOut, tracePIDError;
 
-uint16_t ADCValue[3];
 int16_t encoderLeft, encoderRight;
-
 uint16_t infraredLeft, infraredCener, infraredRight;
 
 int main(void) {
@@ -153,8 +151,7 @@ int main(void) {
 	
 	Serial_init(&BluetoothSerial);
 	
-//	NVIC_ClearPendingIRQ(infraredADC_INST_INT_IRQN);
-//	NVIC_EnableIRQ(infraredADC_INST_INT_IRQN);
+	DL_ADC12_startConversion(infraredADC_INST);
 
 	NVIC_ClearPendingIRQ(Encoder_INT_IRQN);
 	NVIC_EnableIRQ(Encoder_INT_IRQN);
@@ -163,10 +160,9 @@ int main(void) {
     NVIC_EnableIRQ(taskTimer_INST_INT_IRQN);
 	
     while (1) {
-		Motor_set(&motorLeft, 7200);
-		Motor_set(&motorRight, 7200);
-//		Serial_printf(&BluetoothSerial, "%d,%d\r\n",speedLfet,speedRight);
-//		Serial_printf(&BluetoothSerial,"%d,%d,%d\r\n", (int)ADCValue[0], (int)ADCValue[1], (int)ADCValue[2]);
+//		Serial_writeByte(&BluetoothSerial, 0xff);
+//		Serial_printf(&BluetoothSerial, "%d,%d\r\n",speedLeft,speedRight);
+//		Serial_printf(&BluetoothSerial,"%d,%d,%d\r\n", infraredLeft, infraredCener, infraredRight;
     }
 }
 
@@ -178,16 +174,26 @@ void msTimer_INST_IRQHandler(void) {
 
 void taskTimer_INST_IRQHandler(void) {
     if(DL_TimerG_getPendingInterrupt(taskTimer_INST) == DL_TIMER_IIDX_ZERO) {
-		DL_ADC12_startConversion(infraredADC_INST);
 		speedLeft = -encoderLeft;
 		speedRight = -encoderRight;
 		
-		OLED_ShowSignedNum(1, 1,speedLeft,4);
-		OLED_ShowSignedNum(2, 1,speedRight,4);
+		Serial_printf(&BluetoothSerial, "%d,%d\r\n",speedLeft,speedRight);
+		
+		encoderLeft = 0;
+		encoderRight = 0;
+		
+		infraredLeft = ADC1->ULLMEM.MEMRES[0];
+		infraredCener = ADC1->ULLMEM.MEMRES[1];
+		infraredRight = ADC1->ULLMEM.MEMRES[2];
+		
+//		OLED_ShowSignedNum(1, 1,speedLeft,4);
+//		OLED_ShowSignedNum(2, 1,speedRight,4);
+		
+//		OLED_ShowSignedNum(1, 1, infraredLeft,4);
+//		OLED_ShowSignedNum(2, 1, infraredCener,4);
+//		OLED_ShowSignedNum(3, 1, infraredRight,4);
 		
 //		Serial_printf(&BluetoothSerial, "%d,%d\r\n",speedLeft,speedRight);
-//		encoderLeft = 0;
-//		encoderRight = 0;
 		
 	
 //		
@@ -259,9 +265,9 @@ void taskTimer_INST_IRQHandler(void) {
         switch (action) {
         case Stop:
             leftPIDOut =
-                PID_Caculate(&motorLeftPID, speedLeft * encoderToPWM - 0);
+                PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM - 0);
             rightPIDOut =
-                PID_Caculate(&motorRightPID, speedRight * encoderToPWM - 0);
+                PID_Caculate(&motorRightPID, speedRight * encoderRightToPWM - 0);
 
             Motor_set(&motorLeft, leftPIDOut);
             Motor_set(&motorRight, rightPIDOut);
@@ -280,10 +286,10 @@ void taskTimer_INST_IRQHandler(void) {
 //            AdvancediffSpeed = PID_Caculate(&tracePID, tracePIDError);
 
             leftPIDOut = PID_Caculate(
-                &motorLeftPID, speedLeft * encoderToPWM -
+                &motorLeftPID, speedLeft * encoderLeftToPWM -
                                    (advanceBaseSpeed + AdvancediffSpeed));
             rightPIDOut = PID_Caculate(
-                &motorRightPID, speedRight * encoderToPWM -
+                &motorRightPID, speedRight * encoderRightToPWM -
                                     (advanceBaseSpeed - AdvancediffSpeed));
             LIMIT(leftPIDOut, -7200, 7200);
             LIMIT(rightPIDOut, -7200, 7200);
@@ -295,10 +301,10 @@ void taskTimer_INST_IRQHandler(void) {
         case Turn:
             if (turnTimer) {
                 leftPIDOut = PID_Caculate(
-                    &motorLeftPID, speedLeft * encoderToPWM - (+turnDiffSpeed));
+                    &motorLeftPID, speedLeft * encoderLeftToPWM - (+turnDiffSpeed));
                 rightPIDOut =
                     PID_Caculate(&motorRightPID,
-                                 speedRight * encoderToPWM - (-turnDiffSpeed));
+                                 speedRight * encoderRightToPWM - (-turnDiffSpeed));
                 LIMIT(leftPIDOut, -7200, 7200);
                 LIMIT(rightPIDOut, -7200, 7200);
 
@@ -311,9 +317,9 @@ void taskTimer_INST_IRQHandler(void) {
 
         case Round:
             leftPIDOut = PID_Caculate(&motorLeftPID,
-                                      speedLeft * encoderToPWM - (+roundSpeed));
+                                      speedLeft * encoderLeftToPWM - (+roundSpeed));
             rightPIDOut = PID_Caculate(
-                &motorRightPID, speedRight * encoderToPWM - (-roundSpeed));
+                &motorRightPID, speedRight * encoderRightToPWM - (-roundSpeed));
             LIMIT(leftPIDOut, -7200, 7200);
             LIMIT(rightPIDOut, -7200, 7200);
 
@@ -324,14 +330,6 @@ void taskTimer_INST_IRQHandler(void) {
     }
 }
 
-void infraredADC_INST_IRQHandler(void) {
-	if (DL_ADC12_getPendingInterrupt(infraredADC_INST) == DL_ADC12_IIDX_MEM2_RESULT_LOADED) {
-        ADCValue[0] = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredLeft);  
-		ADCValue[1] = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredCenter);
-		ADCValue[2] = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredRight);		
-     }
-}
-
 void GROUP1_IRQHandler(void) {
     uint32_t INT_PIN = DL_GPIO_getEnabledInterruptStatus(Encoder_PORT, Encoder_EncoderLeft1_PIN | Encoder_EncoderLeft2_PIN | Encoder_EncoderRight1_PIN | Encoder_EncoderRight2_PIN);
  
@@ -339,13 +337,13 @@ void GROUP1_IRQHandler(void) {
         if(DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft1_PIN) > 0) {
 			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft2_PIN) > 0) {
 				encoderLeft--;
-			} else  {
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft2_PIN) == 0) {
 				encoderLeft++;
 			}
-		} else  {
+		} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft1_PIN) == 0) {
 			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft2_PIN) > 0) {
 				encoderLeft++;
-			} else {
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft2_PIN) == 0) {
 				encoderLeft--;
 		       }
 		}
@@ -354,13 +352,13 @@ void GROUP1_IRQHandler(void) {
 		if(DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft2_PIN) > 0) {
 			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft1_PIN) > 0) {
 				encoderLeft++;
-			} else  {
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft1_PIN) == 0) {
 				encoderLeft--;
 			}
-		} else  {
+		} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft2_PIN) == 0) {
 			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft1_PIN) > 0) {
 				encoderLeft--;
-			} else {
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderLeft1_PIN) == 0) {
 				encoderLeft++;
 		       }
 		}
@@ -369,13 +367,13 @@ void GROUP1_IRQHandler(void) {
         if(DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight1_PIN) > 0) {
 			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight2_PIN) > 0) {
 				encoderRight--;
-			} else  {
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight2_PIN) == 0) {
 				encoderRight++;
 			}
-		} else  {
+		} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight1_PIN) == 0) {
 			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight2_PIN) > 0) {
 				encoderRight++;
-			} else  {
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight2_PIN) == 0) {
 				encoderRight--;
 		       }
 		}
@@ -384,13 +382,13 @@ void GROUP1_IRQHandler(void) {
 		if(DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight2_PIN) > 0) {
 			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight1_PIN) > 0) {
 				encoderRight++;
-			} else  {
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight1_PIN) == 0) {
 				encoderRight--;
 			}
-		} else {
+		} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight2_PIN) == 0) {
 			if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight1_PIN) > 0) {
 				encoderRight--;
-			} else  {
+			} else if (DL_GPIO_readPins(Encoder_PORT, Encoder_EncoderRight1_PIN) == 0) {
 				encoderRight++;
 		       }
 		}
