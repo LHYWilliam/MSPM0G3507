@@ -40,6 +40,7 @@
 #include "serial.h"
 
 volatile uint32_t ms = 0;
+uint8_t question = 2;
 
 Serial BluetoothSerial = {
     .uart = Bluetooth_INST,
@@ -72,13 +73,17 @@ PID tracePID = {
     .imax = 1024,
 };
 
-PID yawPID = {
-//    .Kp = 1.2,
-//    .Ki = 0,
-//    .Kd = -0.001,
+PID advanceYawPID = {
+	  .Kp = 20,
+    .Ki = 0,
+    .Kd = -0,
+    .imax = 1024,
+};
+
+PID turnYawPID = {
 	  .Kp = -3.6,
     .Ki = 0,
-    .Kd = -0.005,
+    .Kd = -0,
     .imax = 1024,
 };
 
@@ -108,7 +113,7 @@ typedef enum {
   Advance,
   Turn,
 } ActionType;
-ActionType action = Turn;
+ActionType action = Advance;
 char *actionString[] = {"Stop", "Trace", "Advance", "Turn"};
 
 typedef enum {
@@ -127,7 +132,7 @@ uint16_t offLineInfrared = 900, onLineInfrared = 1800;
 uint16_t advanceBaseSpeed = 2048, turnBaseTime = 1000;
 
 int16_t AdvancediffSpeed, turnDiffSpeed;
-uint16_t turnTime = 3000, turnTimer = ENABLE;
+uint16_t turnTime = 3000, turnTimer = DISABLE;
 
 int16_t speedLeft, speedRight;
 int16_t leftPIDOut, rightPIDOut, tracePIDError;
@@ -135,12 +140,12 @@ int16_t leftPIDOut, rightPIDOut, tracePIDError;
 int16_t encoderLeft, encoderRight;
 uint16_t infraredLeft, infraredCenter, infraredRight;
 
-float pitch, roll, yaw, turnTimeYaw, turnTargetYaw = -38.66;
+float pitch, roll, yaw, AdvanceYaw, turnTimeYaw, turnTargetYaw = -38.66;
 int16_t yawPIDOut;
 
 uint16_t ADCValue[3];
 
-uint8_t count = 0;
+uint8_t traceToAdvancceCount = 1;
 
 int main(void) {
   SYSCFG_DL_init();
@@ -157,7 +162,8 @@ int main(void) {
 
   Serial_init(&BluetoothSerial);
   PID_Init(&tracePID);
-	PID_Init(&yawPID);
+	PID_Init(&advanceYawPID);
+	PID_Init(&turnYawPID);
   PID_Init(&motorLeftPID);
   PID_Init(&motorRightPID);
 
@@ -177,8 +183,9 @@ int main(void) {
 //    OLED_ShowNum(2, 1, infraredCenter, 4);
 //    OLED_ShowNum(3, 1, infraredRight, 4);
 		DMP_GetData(&pitch, &roll, &yaw);
-		OLED_ShowSignedNum(1, 1, yaw, 3);
-		OLED_ShowNum(2, 1, ms, 6);
+		OLED_ShowSignedNum(1, 1, yaw, 4);
+		OLED_ShowNum(2, 1, traceToAdvancceCount, 6);
+		OLED_ShowString(3, 1, actionString[action]);
   }
 }
 
@@ -200,102 +207,131 @@ void taskTimer_INST_IRQHandler(void) {
     infraredRight = ADCValue[2];
 
     switch (lineState) {
-    case OffLine:
-      if (infraredLeft > onLineInfrared || infraredCenter > onLineInfrared ||
-          infraredRight > onLineInfrared) {
-        lineState = OnLine;
-        action = Trace;
-
-        tracePID.integrator = 0;
-        motorLeftPID.integrator = 0;
-        motorRightPID.integrator = 0;
-      }
-			
-			if (turnTimer > turnTime) {
-				turnTimer = DISABLE;
-				
-				lineState = OffLine;
-				action = Advance;
-			}
-      break;
+		case OffLine:
+								switch (action){
+								case Stop:
+								case Advance:
+									if (infraredLeft > onLineInfrared || infraredCenter > onLineInfrared ||
+										infraredRight > onLineInfrared) {
+										lineState = OnLine;
+										action = Trace;
+											
+										tracePID.integrator = 0;
+										motorLeftPID.integrator = 0;
+										motorRightPID.integrator = 0;
+									}	
+									break;
+								
+								case Turn:
+									turnTimer += 10;
+									
+									if (turnTimer > turnTime){
+										lineState = OffLine;
+										action = Advance;
+										
+										AdvanceYaw = yaw;
+										turnTimer = DISABLE;
+									}
+									break;
+									
+								default:
+									break;
+							}
+			break;
 
     case OnLine:
-      if (infraredLeft < offLineInfrared && infraredCenter < offLineInfrared &&
-          infraredRight < offLineInfrared) {
-        lineState = OffLine;
-        action = Advance;
-						
-				count++;
-						
-        tracePID.integrator = 0;
-        motorLeftPID.integrator = 0;
-        motorRightPID.integrator = 0;
-      }
+								if (infraredLeft < offLineInfrared && infraredCenter < offLineInfrared &&
+										infraredRight < offLineInfrared) {
+									if (question == 1 || question == 2) {
+										lineState = OffLine;
+										action = Advance;
+										
+										traceToAdvancceCount++;
+										
+										tracePID.integrator = 0;
+										motorLeftPID.integrator = 0;
+										motorRightPID.integrator = 0;
+									} else if (question == 3) {
+										lineState = OffLine;
+										action = Turn;
+										
+										turnTimer = ENABLE;
+										turnTimeYaw = yaw;
+									}
+								}
     }
 
     switch (action) {
     case Stop:
-      leftPIDOut =
-          PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM - 0);
-      rightPIDOut =
-          PID_Caculate(&motorRightPID, speedRight * encoderRightToPWM - 0);
+				leftPIDOut =
+						PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM - 0);
+				rightPIDOut =
+						PID_Caculate(&motorRightPID, speedRight * encoderRightToPWM - 0);
 
-      Motor_set(&motorLeft, leftPIDOut);
-      Motor_set(&motorRight, rightPIDOut);
-      break;
+				Motor_set(&motorLeft, leftPIDOut);
+				Motor_set(&motorRight, rightPIDOut);
+				break;
 
     case Trace:
-      if (infraredCenter > infraredMaxCenter) {
-        tracePIDError = infraredLeft - infraredRight;
-      } else if (infraredLeft > infraredRight) {
-        tracePIDError = (2 * infraredMax - infraredLeft) - infraredRight;
-      } else if (infraredLeft < infraredRight) {
-        tracePIDError = infraredLeft - (2 * infraredMax - infraredRight);
-      }
-      AdvancediffSpeed = PID_Caculate(&tracePID, tracePIDError);
+				if (infraredCenter > infraredMaxCenter) {
+					tracePIDError = infraredLeft - infraredRight;
+				} else if (infraredLeft > infraredRight) {
+					tracePIDError = (2 * infraredMax - infraredLeft) - infraredRight;
+				} else if (infraredLeft < infraredRight) {
+					tracePIDError = infraredLeft - (2 * infraredMax - infraredRight);
+				}
+				AdvancediffSpeed = PID_Caculate(&tracePID, tracePIDError);
 
-      leftPIDOut = PID_Caculate(&motorLeftPID,
-                                speedLeft * encoderLeftToPWM -
-                                    (advanceBaseSpeed + AdvancediffSpeed));
-      rightPIDOut = PID_Caculate(&motorRightPID,
-                                 speedRight * encoderRightToPWM -
-                                     (advanceBaseSpeed - AdvancediffSpeed));
-      LIMIT(leftPIDOut, -7200, 7200);
-      LIMIT(rightPIDOut, -7200, 7200);
+				leftPIDOut = PID_Caculate(&motorLeftPID,
+																	speedLeft * encoderLeftToPWM -
+																			(advanceBaseSpeed + AdvancediffSpeed));
+				rightPIDOut = PID_Caculate(&motorRightPID,
+																	 speedRight * encoderRightToPWM -
+																			 (advanceBaseSpeed - AdvancediffSpeed));
+				LIMIT(leftPIDOut, -7200, 7200);
+				LIMIT(rightPIDOut, -7200, 7200);
 
-      Motor_set(&motorLeft, leftPIDOut);
-      Motor_set(&motorRight, rightPIDOut);
-      break;
+				Motor_set(&motorLeft, leftPIDOut);
+				Motor_set(&motorRight, rightPIDOut);
+				break;
 
     case Advance:
-			yawPIDOut = PID_Caculate(&yawPID, yaw - (count % 2 ? 0 : 180));
-			
-      leftPIDOut = PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM -
-                                                   (advanceBaseSpeed + yawPIDOut));
-      rightPIDOut = PID_Caculate(
-          &motorRightPID, speedRight * encoderRightToPWM - (advanceBaseSpeed -yawPIDOut));
+				if (question == 1 || question == 2) {
+					float advanceTargetYaw = 0;
+					if (traceToAdvancceCount == 1) {
+						yawPIDOut = PID_Caculate(&advanceYawPID, yaw - 0);
+					} else if (traceToAdvancceCount == 2){
+						advanceYawPID.Kp = 0.9 - 0.005;
+						yawPIDOut = PID_Caculate(&advanceYawPID, yaw - (-180));
+					}
+				} else if (question == 3) {
+					yawPIDOut = PID_Caculate(&turnYawPID, yaw - AdvanceYaw);
+				}
+				
+				leftPIDOut = PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM -
+																										 (advanceBaseSpeed + yawPIDOut)); 
+				rightPIDOut = PID_Caculate(
+						&motorRightPID, speedRight * encoderRightToPWM - (advanceBaseSpeed -yawPIDOut));
 
-      Motor_set(&motorLeft, leftPIDOut);
-      Motor_set(&motorRight, rightPIDOut);
-      break;
+				Motor_set(&motorLeft, leftPIDOut);
+				Motor_set(&motorRight, rightPIDOut);
+				break;
 
     case Turn:
-      if (turnTimer) {
-				yawPIDOut = PID_Caculate(&yawPID, turnTimeYaw + turnTargetYaw - yaw);
-				
-        leftPIDOut = PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM -
-                                                     (+yawPIDOut));	
-        rightPIDOut = PID_Caculate(
-            &motorRightPID, speedRight * encoderRightToPWM - (-yawPIDOut));
-        LIMIT(leftPIDOut, -7200, 7200);
-        LIMIT(rightPIDOut, -7200, 7200);
+				if (turnTimer) {
+					yawPIDOut = PID_Caculate(&turnYawPID, yaw - (turnTimeYaw + turnTargetYaw));
+					
+					leftPIDOut = PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM -
+																											 (+yawPIDOut));	
+					rightPIDOut = PID_Caculate(
+							&motorRightPID, speedRight * encoderRightToPWM - (-yawPIDOut));
+					LIMIT(leftPIDOut, -7200, 7200);
+					LIMIT(rightPIDOut, -7200, 7200);
 
-        Motor_set(&motorLeft,  leftPIDOut);
-        Motor_set(&motorRight, rightPIDOut);
-
-        turnTimer += 10;
-      }
-      break;
+					Motor_set(&motorLeft,  leftPIDOut);
+					Motor_set(&motorRight, rightPIDOut);
+				}
+				break;
     }
   }
 }
