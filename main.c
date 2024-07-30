@@ -42,7 +42,7 @@
 #define MAPPING(x) ((x) >= 0 ? (x) : (360 + (x)))
 
 volatile uint32_t ms = 0;
-uint8_t question = 3;
+uint8_t question = 2;
 
 Serial BluetoothSerial = {
     .uart = Bluetooth_INST,
@@ -147,7 +147,7 @@ int16_t yawPIDOut;
 
 uint16_t ADCValue[3];
 
-uint8_t traceToAdvancceCount = 1, traceToTurnCount = 0;
+uint8_t traceToAdvancceCount = 0, traceToTurnCount = 0;
 
 int main(void) {
   SYSCFG_DL_init();
@@ -253,6 +253,11 @@ void taskTimer_INST_IRQHandler(void) {
 										tracePID.integrator = 0;
 										motorLeftPID.integrator = 0;
 										motorRightPID.integrator = 0;
+										
+										if (traceToAdvancceCount >= 2){
+											lineState = OffLine;
+											action = Stop;
+										}
 									} else if (question == 3) {
 										lineState = OffLine;
 										action = Turn;
@@ -306,9 +311,9 @@ void taskTimer_INST_IRQHandler(void) {
     case Advance:
 				if (question == 1 || question == 2) {
 					float advanceTargetYaw = 0;
-					if (traceToAdvancceCount == 1) {
+					if (traceToAdvancceCount == 0) {
 						yawPIDOut = PID_Caculate(&advanceYawPID, yaw - 0);
-					} else if (traceToAdvancceCount == 2){
+					} else if (traceToAdvancceCount == 1){
 						advanceYawPID.Kp = 0.9 - 0.005;
 						yawPIDOut = PID_Caculate(&advanceYawPID, yaw - (-180));
 					}
