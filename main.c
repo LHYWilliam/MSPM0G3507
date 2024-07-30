@@ -142,12 +142,12 @@ int16_t leftPIDOut, rightPIDOut, tracePIDError;
 int16_t encoderLeft, encoderRight;
 uint16_t infraredLeft, infraredCenter, infraredRight;
 
-float pitch, roll, yaw, AdvanceYaw, turnTimeYaw, turnTargetYaw = 42.96;
+float pitch, roll, yaw, AdvanceYaw, turnTimeYaw, turnTargetYaw = 42.98;
 int16_t yawPIDOut;
 
 uint16_t ADCValue[3];
 
-uint8_t traceToAdvancceCount = 1;
+uint8_t traceToAdvancceCount = 1, traceToTurnCount = 0;
 
 int main(void) {
   SYSCFG_DL_init();
@@ -257,8 +257,14 @@ void taskTimer_INST_IRQHandler(void) {
 										lineState = OffLine;
 										action = Turn;
 										
+										traceToTurnCount++;
 										turnTimer = ENABLE;
 										turnTimeYaw = yaw;
+										
+										if (traceToTurnCount >= 2) {
+											lineState = OffLine;
+											action = Stop;
+										}
 									}
 								}
     }
