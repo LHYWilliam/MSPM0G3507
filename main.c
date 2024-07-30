@@ -38,7 +38,7 @@
 #include "motor.h"
 #include "delay.h"
 
-uint32_t ms = 0;
+volatile uint32_t ms = 0;
 
 Serial BluetoothSerial = {
 	.uart = Bluetooth_INST,
@@ -51,7 +51,7 @@ Motor motorLeft = {
 	.IN2_pins = MotorIN_LeftIN2_PIN,
 	.PWM = MotorPWM_INST,
 	.Index = GPIO_MotorPWM_C0_IDX,
-	.invert = ENABLE,
+	.invert = DISABLE,
 };
 
 Motor motorRight = {
@@ -61,7 +61,7 @@ Motor motorRight = {
 	.IN2_pins = MotorIN_RightIN2_PIN,
 	.PWM = MotorPWM_INST,
 	.Index = GPIO_MotorPWM_C1_IDX,
-	.invert = DISABLE,
+	.invert = ENABLE,
 };
 
 PID tracePID = {
@@ -72,15 +72,15 @@ PID tracePID = {
 };
 
 PID motorLeftPID = {
-    .Kp = -0,
-    .Ki = -0,
+    .Kp = -2.25,
+    .Ki = -8,
     .Kd = 0,
     .imax = 2048,
 };
 
 PID motorRightPID = {
-    .Kp = -0,
-    .Ki = -0,
+    .Kp = -2.25,
+    .Ki = -8,
     .Kd = 0,
     .imax = 2048,
 };
@@ -97,7 +97,7 @@ typedef enum {
     Turn,
     Round,
 } ActionType;
-ActionType action = Stop;
+ActionType action = Advance;
 char *actionString[] = {"Stop", "Advance", "Turn", "Round"};
 
 typedef enum {
@@ -122,7 +122,7 @@ char *lineString[] = {"OffLine", "OnLine", "OnCross"};
 void Serial_Praser(Serial *serial);
 void Serial_Handler(Serial *serial);
 
-float encoderLeftToPWM = 7200. / 56.5, encoderRightToPWM = 7200 / 54.;
+float encoderLeftToPWM = 7200. / 68.084, encoderRightToPWM = 7200 / 70.285;
 uint16_t infraredMax = 3850, infraredMaxCenter = 2500;
 uint16_t offLineInfrared = 1024, onLineInfrared = 3700, onCrossInfrared = 3800;
 uint16_t advanceBaseSpeed = 1024, turnBaseSpeed = 390, turnBaseTime = 1000,
@@ -135,7 +135,7 @@ int16_t speedLeft, speedRight;
 int16_t leftPIDOut, rightPIDOut, tracePIDError;
 
 int16_t encoderLeft, encoderRight;
-uint16_t infraredLeft, infraredCener, infraredRight;
+uint16_t infraredLeft, infraredCenter, infraredRight;
 
 int main(void) {
     SYSCFG_DL_init();
@@ -146,10 +146,13 @@ int main(void) {
 	NVIC_ClearPendingIRQ(msTimer_INST_INT_IRQN);
 	NVIC_EnableIRQ(msTimer_INST_INT_IRQN);
 	
-	NVIC_ClearPendingIRQ(Bluetooth_INST_INT_IRQN);
-	NVIC_EnableIRQ(Bluetooth_INST_INT_IRQN);
+//	NVIC_ClearPendingIRQ(Bluetooth_INST_INT_IRQN);
+//	NVIC_EnableIRQ(Bluetooth_INST_INT_IRQN);
 	
 	Serial_init(&BluetoothSerial);
+	PID_Init(&tracePID);
+	PID_Init(&motorLeftPID);
+	PID_Init(&motorRightPID);
 	
 	DL_ADC12_startConversion(infraredADC_INST);
 
@@ -160,8 +163,12 @@ int main(void) {
     NVIC_EnableIRQ(taskTimer_INST_INT_IRQN);
 	
     while (1) {
+//		Serial_printf(&BluetoothSerial, "%d,%d,%d,%d\n", leftPIDOut, rightPIDOut,
+//                           (int16_t)(speedLeft * encoderLeftToPWM),
+//                           (int16_t)(speedRight * encoderRightToPWM));
+//		Motor_set(&motorLeft, 7200);
+//		Motor_set(&motorRight, 7200);
 //		Serial_writeByte(&BluetoothSerial, 0xff);
-//		Serial_printf(&BluetoothSerial, "%d,%d\r\n",speedLeft,speedRight);
 //		Serial_printf(&BluetoothSerial,"%d,%d,%d\r\n", infraredLeft, infraredCener, infraredRight;
     }
 }
@@ -174,28 +181,20 @@ void msTimer_INST_IRQHandler(void) {
 
 void taskTimer_INST_IRQHandler(void) {
     if(DL_TimerG_getPendingInterrupt(taskTimer_INST) == DL_TIMER_IIDX_ZERO) {
-		speedLeft = -encoderLeft;
-		speedRight = -encoderRight;
+		speedLeft = encoderLeft;
+		speedRight = encoderRight;
 		
-		Serial_printf(&BluetoothSerial, "%d,%d\r\n",speedLeft,speedRight);
+//		Serial_printf(&BluetoothSerial, "%d,%d\n",speedLeft, speedRight);
+		
 		
 		encoderLeft = 0;
 		encoderRight = 0;
 		
 		infraredLeft = ADC1->ULLMEM.MEMRES[0];
-		infraredCener = ADC1->ULLMEM.MEMRES[1];
+		infraredCenter = ADC1->ULLMEM.MEMRES[1];
 		infraredRight = ADC1->ULLMEM.MEMRES[2];
 		
-//		OLED_ShowSignedNum(1, 1,speedLeft,4);
-//		OLED_ShowSignedNum(2, 1,speedRight,4);
-		
-//		OLED_ShowSignedNum(1, 1, infraredLeft,4);
-//		OLED_ShowSignedNum(2, 1, infraredCener,4);
-//		OLED_ShowSignedNum(3, 1, infraredRight,4);
-		
-//		Serial_printf(&BluetoothSerial, "%d,%d\r\n",speedLeft,speedRight);
-		
-	
+//		Serial_printf(&BluetoothSerial,"%d,%d,%d\r\n", infraredLeft, infraredCenter, infraredRight);
 //		
 ////		switch (lineState) {
 ////        case OffLine:
@@ -328,6 +327,8 @@ void taskTimer_INST_IRQHandler(void) {
             break;
         }
     }
+	
+//	Serial_printf(&BluetoothSerial, "%d,%d,%d,%d\n",leftPIDOut, rightPIDOut, (int16_t)(speedLeft * encoderLeftToPWM), (int16_t)(speedRight * encoderRightToPWM));
 }
 
 void GROUP1_IRQHandler(void) {
@@ -396,96 +397,94 @@ void GROUP1_IRQHandler(void) {
     }
 }
 
-void Bluetooth_INST_IRQHandler(void) {
-  if (DL_UART_Main_getPendingInterrupt(Bluetooth_INST) == DL_UART_IIDX_RX) {
-        Serial_Praser(&BluetoothSerial);
-        Serial_Handler(&BluetoothSerial);
-  }
-}
+//void Bluetooth_INST_IRQHandler(void) {
+//  if (DL_UART_Main_getPendingInterrupt(Bluetooth_INST) == DL_UART_IIDX_RX) {
+//        Serial_Praser(&BluetoothSerial);
+//        Serial_Handler(&BluetoothSerial);
+//  }
+//}
 
 
-void Serial_Praser(Serial *serial) {
-    serial->ByteData = Serial_readByte(serial);
-	
-	Serial_writeByte(&BluetoothSerial, serial->ByteData);
+//void Serial_Praser(Serial *serial) {
+//    serial->ByteData = Serial_readByte(serial);
 
-    switch (serial->type) {
-    case None:
-        if (serial->ByteData == 0xFF) {
-            serial->type = HexPack;
-        } else {
-            Serial_clear(serial);
-        }
-        break;
+//    switch (serial->type) {
+//    case None:
+//        if (serial->ByteData == 0xFF) {
+//            serial->type = HexPack;
+//        } else {
+//            Serial_clear(serial);
+//        }
+//        break;
 
-    case HexPack:
-        if (serial->ByteData == 0xFE && serial->count == 3) {
-            serial->RecieveFlag = SET;
-        } else {
-            serial->HexData[serial->count++] = serial->ByteData;
-        }
+//    case HexPack:
+//        if (serial->ByteData == 0xFE && serial->count == 3) {
+//            serial->RecieveFlag = SET;
+//        } else {
+//            serial->HexData[serial->count++] = serial->ByteData;
+//        }
 
-        if (serial->count > 3) {
-            Serial_clear(serial);
-        }
-        break;
+//        if (serial->count > 3) {
+//            Serial_clear(serial);
+//        }
+//        break;
 
-    default:
-        Serial_clear(serial);
-        break;
-    }
-}
+//    default:
+//        Serial_clear(serial);
+//        break;
+//    }
+//}
 
-void Serial_Handler(Serial *serial) {
-    if (serial->RecieveFlag == SET) {
-        action = serial->HexData[0];
+//void Serial_Handler(Serial *serial) {
+//    if (serial->RecieveFlag == SET) {
+//        action = serial->HexData[0];
 
-        switch (action) {
-        case Stop:
-            break;
+//        switch (action) {
+//        case Stop:
+//            break;
 
-        case Advance:
-            AdvancediffSpeed =
-                (int16_t)(serial->HexData[1] << 8 | serial->HexData[2]);
-            break;
+//        case Advance:
+//            AdvancediffSpeed =
+//                (int16_t)(serial->HexData[1] << 8 | serial->HexData[2]);
+//            break;
 
-        case Turn:
-            direction = (int16_t)(serial->HexData[1] << 8 | serial->HexData[2]);
+//        case Turn:
+//            direction = (int16_t)(serial->HexData[1] << 8 | serial->HexData[2]);
 
-            switch (direction) {
-            case Forward:
-                break;
+//            switch (direction) {
+//            case Forward:
+//                break;
 
-            case TurnLeft:
-                turnTime = turnBaseTime;
-                turnDiffSpeed = -turnBaseSpeed;
-                break;
+//            case TurnLeft:
+//                turnTime = turnBaseTime;
+//                turnDiffSpeed = -turnBaseSpeed;
+//                break;
 
-            case TurnRight:
-                turnTime = turnBaseTime;
-                turnDiffSpeed = turnBaseSpeed;
-                break;
+//            case TurnRight:
+//                turnTime = turnBaseTime;
+//                turnDiffSpeed = turnBaseSpeed;
+//                break;
 
-            case TurnBack:
-                turnTime = turnBaseTime * 2;
-                turnDiffSpeed = turnBaseSpeed;
-                break;
-			
-			default:
-				break;
-            }
+//            case TurnBack:
+//                turnTime = turnBaseTime * 2;
+//                turnDiffSpeed = turnBaseSpeed;
+//                break;
+//			
+//			default:
+//				break;
+//            }
 
-            turnTimer = ENABLE;
-            break;
+//            turnTimer = ENABLE;
+//            break;
 
-        case Round:
-            break;
+//        case Round:
+//            break;
 
-        default:
-            action = Stop;
-            break;
-        }
+//        default:
+//            action = Stop;
+//            break;
+//        }
 
-        Serial_clear(serial);
-    }
-}
+//        Serial_clear(serial);
+//    }
+//}

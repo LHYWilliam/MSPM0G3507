@@ -4,7 +4,7 @@
 
 float RC = 1 / (2 * 3.14 * 20);
 
-extern uint32_t ms;
+extern volatile  uint32_t ms;
 
 void PID_Init(PID *pid) {
     pid->NaN = RESET;

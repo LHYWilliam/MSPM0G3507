@@ -180,25 +180,25 @@ extern "C" {
 /* Port definition for Pin Group Encoder */
 #define Encoder_PORT                                                     (GPIOA)
 
-/* Defines for EncoderLeft1: GPIOA.12 with pinCMx 34 on package pin 5 */
+/* Defines for EncoderLeft1: GPIOA.24 with pinCMx 54 on package pin 25 */
 // pins affected by this interrupt request:["EncoderLeft1","EncoderLeft2","EncoderRight1","EncoderRight2"]
 #define Encoder_INT_IRQN                                        (GPIOA_INT_IRQn)
 #define Encoder_INT_IIDX                        (DL_INTERRUPT_GROUP1_IIDX_GPIOA)
-#define Encoder_EncoderLeft1_IIDX                           (DL_GPIO_IIDX_DIO12)
-#define Encoder_EncoderLeft1_PIN                                (DL_GPIO_PIN_12)
-#define Encoder_EncoderLeft1_IOMUX                               (IOMUX_PINCM34)
-/* Defines for EncoderLeft2: GPIOA.17 with pinCMx 39 on package pin 10 */
-#define Encoder_EncoderLeft2_IIDX                           (DL_GPIO_IIDX_DIO17)
-#define Encoder_EncoderLeft2_PIN                                (DL_GPIO_PIN_17)
-#define Encoder_EncoderLeft2_IOMUX                               (IOMUX_PINCM39)
-/* Defines for EncoderRight1: GPIOA.24 with pinCMx 54 on package pin 25 */
-#define Encoder_EncoderRight1_IIDX                          (DL_GPIO_IIDX_DIO24)
-#define Encoder_EncoderRight1_PIN                               (DL_GPIO_PIN_24)
-#define Encoder_EncoderRight1_IOMUX                              (IOMUX_PINCM54)
-/* Defines for EncoderRight2: GPIOA.22 with pinCMx 47 on package pin 18 */
-#define Encoder_EncoderRight2_IIDX                          (DL_GPIO_IIDX_DIO22)
-#define Encoder_EncoderRight2_PIN                               (DL_GPIO_PIN_22)
-#define Encoder_EncoderRight2_IOMUX                              (IOMUX_PINCM47)
+#define Encoder_EncoderLeft1_IIDX                           (DL_GPIO_IIDX_DIO24)
+#define Encoder_EncoderLeft1_PIN                                (DL_GPIO_PIN_24)
+#define Encoder_EncoderLeft1_IOMUX                               (IOMUX_PINCM54)
+/* Defines for EncoderLeft2: GPIOA.22 with pinCMx 47 on package pin 18 */
+#define Encoder_EncoderLeft2_IIDX                           (DL_GPIO_IIDX_DIO22)
+#define Encoder_EncoderLeft2_PIN                                (DL_GPIO_PIN_22)
+#define Encoder_EncoderLeft2_IOMUX                               (IOMUX_PINCM47)
+/* Defines for EncoderRight1: GPIOA.12 with pinCMx 34 on package pin 5 */
+#define Encoder_EncoderRight1_IIDX                          (DL_GPIO_IIDX_DIO12)
+#define Encoder_EncoderRight1_PIN                               (DL_GPIO_PIN_12)
+#define Encoder_EncoderRight1_IOMUX                              (IOMUX_PINCM34)
+/* Defines for EncoderRight2: GPIOA.17 with pinCMx 39 on package pin 10 */
+#define Encoder_EncoderRight2_IIDX                          (DL_GPIO_IIDX_DIO17)
+#define Encoder_EncoderRight2_PIN                               (DL_GPIO_PIN_17)
+#define Encoder_EncoderRight2_IOMUX                              (IOMUX_PINCM39)
 /* Port definition for Pin Group MPU */
 #define MPU_PORT                                                         (GPIOA)
 
