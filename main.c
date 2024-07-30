@@ -34,6 +34,7 @@
 
 #include "OLED.h"
 #include "delay.h"
+#include "dmp.h"
 #include "motor.h"
 #include "pid.h"
 #include "serial.h"
@@ -71,6 +72,16 @@ PID tracePID = {
     .imax = 1024,
 };
 
+PID yawPID = {
+//    .Kp = 1.2,
+//    .Ki = 0,
+//    .Kd = -0.001,
+	  .Kp = -3.6,
+    .Ki = 0,
+    .Kd = -0.005,
+    .imax = 1024,
+};
+
 PID motorLeftPID = {
     .Kp = -2.25,
     .Ki = -8,
@@ -97,19 +108,8 @@ typedef enum {
   Advance,
   Turn,
 } ActionType;
-ActionType action = Stop;
+ActionType action = Turn;
 char *actionString[] = {"Stop", "Trace", "Advance", "Turn"};
-
-typedef enum {
-  NoDirection = 0x0,
-  Forward = 0x1,
-  TurnLeft = 0x2,
-  TurnRight = 0x4,
-  TurnBack = 0x8,
-} DirectionType;
-DirectionType direction = TurnRight;
-char *directionString[] = {"NoDirection", "Forward", "TurnLeft", "TurnRight",
-                           "TurnBack"};
 
 typedef enum {
   OffLine,
@@ -124,11 +124,10 @@ void Serial_Handler(Serial *serial);
 float encoderLeftToPWM = 7200. / 70.685, encoderRightToPWM = 7200 / 70.285;
 uint16_t infraredMax = 3850, infraredMaxCenter = 2500;
 uint16_t offLineInfrared = 900, onLineInfrared = 1800;
-uint16_t advanceBaseSpeed = 2048, turnBaseSpeed = 390, turnBaseTime = 1000,
-         turnAdvanceSpeed = 3072, roundSpeed = 390;
+uint16_t advanceBaseSpeed = 2048, turnBaseTime = 1000;
 
 int16_t AdvancediffSpeed, turnDiffSpeed;
-uint16_t turnTime, turnTimer = DISABLE;
+uint16_t turnTime = 3000, turnTimer = ENABLE;
 
 int16_t speedLeft, speedRight;
 int16_t leftPIDOut, rightPIDOut, tracePIDError;
@@ -136,12 +135,18 @@ int16_t leftPIDOut, rightPIDOut, tracePIDError;
 int16_t encoderLeft, encoderRight;
 uint16_t infraredLeft, infraredCenter, infraredRight;
 
+float pitch, roll, yaw, turnTimeYaw, turnTargetYaw = -38.66;
+int16_t yawPIDOut;
+
 uint16_t ADCValue[3];
+
+uint8_t count = 0;
 
 int main(void) {
   SYSCFG_DL_init();
 
   OLED_Init();
+  DMP_Init();
   Serial_init(&BluetoothSerial);
 
   NVIC_ClearPendingIRQ(msTimer_INST_INT_IRQN);
@@ -152,6 +157,7 @@ int main(void) {
 
   Serial_init(&BluetoothSerial);
   PID_Init(&tracePID);
+	PID_Init(&yawPID);
   PID_Init(&motorLeftPID);
   PID_Init(&motorRightPID);
 
@@ -167,9 +173,12 @@ int main(void) {
   NVIC_EnableIRQ(taskTimer_INST_INT_IRQN);
 
   while (1) {
-    OLED_ShowNum(1, 1, infraredLeft, 4);
-    OLED_ShowNum(2, 1, infraredCenter, 4);
-    OLED_ShowNum(3, 1, infraredRight, 4);
+//    OLED_ShowNum(1, 1, infraredLeft, 4);
+//    OLED_ShowNum(2, 1, infraredCenter, 4);
+//    OLED_ShowNum(3, 1, infraredRight, 4);
+		DMP_GetData(&pitch, &roll, &yaw);
+		OLED_ShowSignedNum(1, 1, yaw, 3);
+		OLED_ShowNum(2, 1, ms, 6);
   }
 }
 
@@ -201,6 +210,13 @@ void taskTimer_INST_IRQHandler(void) {
         motorLeftPID.integrator = 0;
         motorRightPID.integrator = 0;
       }
+			
+			if (turnTimer > turnTime) {
+				turnTimer = DISABLE;
+				
+				lineState = OffLine;
+				action = Advance;
+			}
       break;
 
     case OnLine:
@@ -208,7 +224,9 @@ void taskTimer_INST_IRQHandler(void) {
           infraredRight < offLineInfrared) {
         lineState = OffLine;
         action = Advance;
-
+						
+				count++;
+						
         tracePID.integrator = 0;
         motorLeftPID.integrator = 0;
         motorRightPID.integrator = 0;
@@ -250,10 +268,12 @@ void taskTimer_INST_IRQHandler(void) {
       break;
 
     case Advance:
+			yawPIDOut = PID_Caculate(&yawPID, yaw - (count % 2 ? 0 : 180));
+			
       leftPIDOut = PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM -
-                                                   advanceBaseSpeed);
+                                                   (advanceBaseSpeed + yawPIDOut));
       rightPIDOut = PID_Caculate(
-          &motorRightPID, speedRight * encoderRightToPWM - advanceBaseSpeed);
+          &motorRightPID, speedRight * encoderRightToPWM - (advanceBaseSpeed -yawPIDOut));
 
       Motor_set(&motorLeft, leftPIDOut);
       Motor_set(&motorRight, rightPIDOut);
@@ -261,15 +281,17 @@ void taskTimer_INST_IRQHandler(void) {
 
     case Turn:
       if (turnTimer) {
+				yawPIDOut = PID_Caculate(&yawPID, turnTimeYaw + turnTargetYaw - yaw);
+				
         leftPIDOut = PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM -
-                                                     (+turnDiffSpeed));
+                                                     (+yawPIDOut));	
         rightPIDOut = PID_Caculate(
-            &motorRightPID, speedRight * encoderRightToPWM - (-turnDiffSpeed));
+            &motorRightPID, speedRight * encoderRightToPWM - (-yawPIDOut));
         LIMIT(leftPIDOut, -7200, 7200);
         LIMIT(rightPIDOut, -7200, 7200);
 
-        Motor_set(&motorLeft, turnAdvanceSpeed + leftPIDOut);
-        Motor_set(&motorRight, turnAdvanceSpeed + rightPIDOut);
+        Motor_set(&motorLeft,  leftPIDOut);
+        Motor_set(&motorRight, rightPIDOut);
 
         turnTimer += 10;
       }

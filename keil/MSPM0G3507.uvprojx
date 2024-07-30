@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>__MSPM0G3507__</Define>
               <Undefine></Undefine>
-              <IncludePath>..\system;..\hardware;..\util;..\core;..\driverlib;..\..\MSPM0G3507;C:\ti\mspm0_sdk_2_01_00_03\source</IncludePath>
+              <IncludePath>..\system;..\hardware;..\util;..\mpu;..\core;..\driverlib;..\..\MSPM0G3507;C:\ti\mspm0_sdk_2_01_00_03\source</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
