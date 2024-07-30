@@ -65,7 +65,7 @@ Motor motorRight = {
 };
 
 PID tracePID = {
-    .Kp = -0,
+    .Kp = -0.4,
     .Ki = 0,
     .Kd = -0,
     .imax = 1024,
@@ -122,10 +122,10 @@ char *lineString[] = {"OffLine", "OnLine", "OnCross"};
 void Serial_Praser(Serial *serial);
 void Serial_Handler(Serial *serial);
 
-float encoderLeftToPWM = 7200. / 68.084, encoderRightToPWM = 7200 / 70.285;
+float encoderLeftToPWM = 7200. / 70.685, encoderRightToPWM = 7200 / 70.285;
 uint16_t infraredMax = 3850, infraredMaxCenter = 2500;
 uint16_t offLineInfrared = 1024, onLineInfrared = 3700, onCrossInfrared = 3800;
-uint16_t advanceBaseSpeed = 1024, turnBaseSpeed = 390, turnBaseTime = 1000,
+uint16_t advanceBaseSpeed = 2048, turnBaseSpeed = 390, turnBaseTime = 1000,
          turnAdvanceSpeed = 3072, roundSpeed = 390;
 
 int16_t AdvancediffSpeed, turnDiffSpeed;
@@ -137,6 +137,8 @@ int16_t leftPIDOut, rightPIDOut, tracePIDError;
 int16_t encoderLeft, encoderRight;
 uint16_t infraredLeft, infraredCenter, infraredRight;
 
+uint16_t ADCValue[3];
+
 int main(void) {
     SYSCFG_DL_init();
 	
@@ -146,8 +148,8 @@ int main(void) {
 	NVIC_ClearPendingIRQ(msTimer_INST_INT_IRQN);
 	NVIC_EnableIRQ(msTimer_INST_INT_IRQN);
 	
-//	NVIC_ClearPendingIRQ(Bluetooth_INST_INT_IRQN);
-//	NVIC_EnableIRQ(Bluetooth_INST_INT_IRQN);
+	NVIC_ClearPendingIRQ(Bluetooth_INST_INT_IRQN);
+	NVIC_EnableIRQ(Bluetooth_INST_INT_IRQN);
 	
 	Serial_init(&BluetoothSerial);
 	PID_Init(&tracePID);
@@ -158,6 +160,9 @@ int main(void) {
 
 	NVIC_ClearPendingIRQ(Encoder_INT_IRQN);
 	NVIC_EnableIRQ(Encoder_INT_IRQN);
+	
+	NVIC_ClearPendingIRQ(infraredADC_INST_INT_IRQN);
+	NVIC_EnableIRQ(infraredADC_INST_INT_IRQN);
 
 	NVIC_ClearPendingIRQ(taskTimer_INST_INT_IRQN);
     NVIC_EnableIRQ(taskTimer_INST_INT_IRQN);
@@ -170,6 +175,10 @@ int main(void) {
 //		Motor_set(&motorRight, 7200);
 //		Serial_writeByte(&BluetoothSerial, 0xff);
 //		Serial_printf(&BluetoothSerial,"%d,%d,%d\r\n", infraredLeft, infraredCener, infraredRight;
+		
+//		OLED_ShowNum(1, 1, infraredLeft, 4);
+//		OLED_ShowNum(2, 1, infraredCenter, 4);
+//		OLED_ShowNum(3, 1, infraredRight, 4);
     }
 }
 
@@ -190,9 +199,13 @@ void taskTimer_INST_IRQHandler(void) {
 		encoderLeft = 0;
 		encoderRight = 0;
 		
-		infraredLeft = ADC1->ULLMEM.MEMRES[0];
-		infraredCenter = ADC1->ULLMEM.MEMRES[1];
-		infraredRight = ADC1->ULLMEM.MEMRES[2];
+//		infraredLeft = ADC1->ULLMEM.MEMRES[0];
+//		infraredCenter = ADC1->ULLMEM.MEMRES[1];
+//		infraredRight = ADC1->ULLMEM.MEMRES[2];
+		
+		infraredLeft = ADCValue[0];
+		infraredCenter = ADCValue[1];
+		infraredRight = ADCValue[2];
 		
 //		Serial_printf(&BluetoothSerial,"%d,%d,%d\r\n", infraredLeft, infraredCenter, infraredRight);
 //		
@@ -273,16 +286,16 @@ void taskTimer_INST_IRQHandler(void) {
             break;
 
         case Advance:
-//            if (infraredCenter > infraredMaxCenter) {
-//                tracePIDError = infraredLeft - infraredRight;
-//            } else if (infraredLeft > infraredRight) {
-//                tracePIDError =
-//                    (2 * infraredMax - infraredLeft) - infraredRight;
-//            } else if (infraredLeft < infraredRight) {
-//                tracePIDError =
-//                    infraredLeft - (2 * infraredMax - infraredRight);
-//            }
-//            AdvancediffSpeed = PID_Caculate(&tracePID, tracePIDError);
+            if (infraredCenter > infraredMaxCenter) {
+                tracePIDError = infraredLeft - infraredRight;
+            } else if (infraredLeft > infraredRight) {
+                tracePIDError =
+                    (2 * infraredMax - infraredLeft) - infraredRight;
+            } else if (infraredLeft < infraredRight) {
+                tracePIDError =
+                    infraredLeft - (2 * infraredMax - infraredRight);
+            }
+            AdvancediffSpeed = PID_Caculate(&tracePID, tracePIDError);
 
             leftPIDOut = PID_Caculate(
                 &motorLeftPID, speedLeft * encoderLeftToPWM -
@@ -329,6 +342,14 @@ void taskTimer_INST_IRQHandler(void) {
     }
 	
 //	Serial_printf(&BluetoothSerial, "%d,%d,%d,%d\n",leftPIDOut, rightPIDOut, (int16_t)(speedLeft * encoderLeftToPWM), (int16_t)(speedRight * encoderRightToPWM));
+}
+
+void infraredADC_INST_IRQHandler(void) {
+	if (DL_ADC12_getPendingInterrupt(infraredADC_INST) == DL_ADC12_IIDX_MEM2_RESULT_LOADED) {
+        ADCValue[0] = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredLeft);  
+		ADCValue[1] = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredCenter);
+		ADCValue[2] = DL_ADC12_getMemResult(infraredADC_INST, infraredADC_ADCMEM_infraredRight);		
+     }
 }
 
 void GROUP1_IRQHandler(void) {
