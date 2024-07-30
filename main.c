@@ -42,7 +42,7 @@
 #define MAPPING(x) ((x) >= 0 ? (x) : (360 + (x)))
 
 volatile uint32_t ms = 0;
-uint8_t question = 2;
+uint8_t question = 1;
 
 Serial BluetoothSerial = {
     .uart = Bluetooth_INST,
@@ -211,13 +211,17 @@ void taskTimer_INST_IRQHandler(void) {
     switch (lineState) {
 		case OffLine:
 								switch (action){
-								case Stop:
 								case Advance:
 									if (infraredLeft > onLineInfrared || infraredCenter > onLineInfrared ||
 										infraredRight > onLineInfrared) {
-										lineState = OnLine;
-										action = Trace;
-											
+										if (question == 1) {
+											lineState = OffLine;
+											action = Stop;
+										} else {
+											lineState = OnLine;
+											action = Trace;
+										}
+										
 										tracePID.integrator = 0;
 										motorLeftPID.integrator = 0;
 										motorRightPID.integrator = 0;
