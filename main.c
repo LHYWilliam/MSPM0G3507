@@ -39,8 +39,10 @@
 #include "pid.h"
 #include "serial.h"
 
+#define MAPPING(x) ((x) >= 0 ? (x) : (360 + (x)))
+
 volatile uint32_t ms = 0;
-uint8_t question = 2;
+uint8_t question = 3;
 
 Serial BluetoothSerial = {
     .uart = Bluetooth_INST,
@@ -81,7 +83,7 @@ PID advanceYawPID = {
 };
 
 PID turnYawPID = {
-	  .Kp = -3.6,
+	  .Kp = 20,
     .Ki = 0,
     .Kd = -0,
     .imax = 1024,
@@ -132,7 +134,7 @@ uint16_t offLineInfrared = 900, onLineInfrared = 1800;
 uint16_t advanceBaseSpeed = 2048, turnBaseTime = 1000;
 
 int16_t AdvancediffSpeed, turnDiffSpeed;
-uint16_t turnTime = 3000, turnTimer = DISABLE;
+uint16_t turnTime = 1000, turnTimer = DISABLE;
 
 int16_t speedLeft, speedRight;
 int16_t leftPIDOut, rightPIDOut, tracePIDError;
@@ -140,7 +142,7 @@ int16_t leftPIDOut, rightPIDOut, tracePIDError;
 int16_t encoderLeft, encoderRight;
 uint16_t infraredLeft, infraredCenter, infraredRight;
 
-float pitch, roll, yaw, AdvanceYaw, turnTimeYaw, turnTargetYaw = -38.66;
+float pitch, roll, yaw, AdvanceYaw, turnTimeYaw, turnTargetYaw = 42.96;
 int16_t yawPIDOut;
 
 uint16_t ADCValue[3];
@@ -319,7 +321,7 @@ void taskTimer_INST_IRQHandler(void) {
 
     case Turn:
 				if (turnTimer) {
-					yawPIDOut = PID_Caculate(&turnYawPID, yaw - (turnTimeYaw + turnTargetYaw));
+					yawPIDOut = PID_Caculate(&turnYawPID, MAPPING(yaw) - MAPPING((turnTimeYaw + turnTargetYaw)));
 					
 					leftPIDOut = PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM -
 																											 (+yawPIDOut));	
