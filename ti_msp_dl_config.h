@@ -143,12 +143,12 @@ extern "C" {
 #define infraredADC_ADCMEM_infraredRight                      DL_ADC12_MEM_IDX_2
 #define infraredADC_ADCMEM_infraredRight_REF         DL_ADC12_REFERENCE_VOLTAGE_VDDA
 #define infraredADC_ADCMEM_infraredRight_REF_VOLTAGE_V                                     3.3
-#define GPIO_infraredADC_C0_PORT                                           GPIOA
-#define GPIO_infraredADC_C0_PIN                                   DL_GPIO_PIN_15
-#define GPIO_infraredADC_C1_PORT                                           GPIOA
-#define GPIO_infraredADC_C1_PIN                                   DL_GPIO_PIN_16
 #define GPIO_infraredADC_C5_PORT                                           GPIOB
 #define GPIO_infraredADC_C5_PIN                                   DL_GPIO_PIN_18
+#define GPIO_infraredADC_C6_PORT                                           GPIOB
+#define GPIO_infraredADC_C6_PIN                                   DL_GPIO_PIN_19
+#define GPIO_infraredADC_C7_PORT                                           GPIOA
+#define GPIO_infraredADC_C7_PIN                                   DL_GPIO_PIN_21
 
 
 

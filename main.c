@@ -65,9 +65,9 @@ Motor motorRight = {
 };
 
 PID tracePID = {
-    .Kp = -0.4,
+    .Kp = -0.3,
     .Ki = 0,
-    .Kd = -0,
+    .Kd = -0.001,
     .imax = 1024,
 };
 
@@ -93,12 +93,12 @@ typedef enum {
 
 typedef enum {
     Stop,
-    Advance,
+    Trace,
+	Advance,
     Turn,
-    Round,
 } ActionType;
-ActionType action = Advance;
-char *actionString[] = {"Stop", "Advance", "Turn", "Round"};
+ActionType action = Stop;
+char *actionString[] = {"Stop", "Trace", "Advance", "Turn"};
 
 typedef enum {
     NoDirection = 0x0,
@@ -114,17 +114,16 @@ char *directionString[] = {"NoDirection", "Forward", "TurnLeft", "TurnRight",
 typedef enum {
     OffLine,
     OnLine,
-    OnCross,
 } LineType;
 LineType lineState = OffLine;
-char *lineString[] = {"OffLine", "OnLine", "OnCross"};
+char *lineString[] = {"OffLine", "OnLine"};
 
 void Serial_Praser(Serial *serial);
 void Serial_Handler(Serial *serial);
 
 float encoderLeftToPWM = 7200. / 70.685, encoderRightToPWM = 7200 / 70.285;
 uint16_t infraredMax = 3850, infraredMaxCenter = 2500;
-uint16_t offLineInfrared = 1024, onLineInfrared = 3700, onCrossInfrared = 3800;
+uint16_t offLineInfrared = 800, onLineInfrared = 1200;
 uint16_t advanceBaseSpeed = 2048, turnBaseSpeed = 390, turnBaseTime = 1000,
          turnAdvanceSpeed = 3072, roundSpeed = 390;
 
@@ -168,17 +167,9 @@ int main(void) {
     NVIC_EnableIRQ(taskTimer_INST_INT_IRQN);
 	
     while (1) {
-//		Serial_printf(&BluetoothSerial, "%d,%d,%d,%d\n", leftPIDOut, rightPIDOut,
-//                           (int16_t)(speedLeft * encoderLeftToPWM),
-//                           (int16_t)(speedRight * encoderRightToPWM));
-//		Motor_set(&motorLeft, 7200);
-//		Motor_set(&motorRight, 7200);
-//		Serial_writeByte(&BluetoothSerial, 0xff);
-//		Serial_printf(&BluetoothSerial,"%d,%d,%d\r\n", infraredLeft, infraredCener, infraredRight;
-		
-//		OLED_ShowNum(1, 1, infraredLeft, 4);
-//		OLED_ShowNum(2, 1, infraredCenter, 4);
-//		OLED_ShowNum(3, 1, infraredRight, 4);
+		OLED_ShowNum(1, 1, infraredLeft, 4);
+		OLED_ShowNum(2, 1, infraredCenter, 4);
+		OLED_ShowNum(3, 1, infraredRight, 4);
     }
 }
 
@@ -192,87 +183,31 @@ void taskTimer_INST_IRQHandler(void) {
     if(DL_TimerG_getPendingInterrupt(taskTimer_INST) == DL_TIMER_IIDX_ZERO) {
 		speedLeft = encoderLeft;
 		speedRight = encoderRight;
-		
-//		Serial_printf(&BluetoothSerial, "%d,%d\n",speedLeft, speedRight);
-		
-		
 		encoderLeft = 0;
 		encoderRight = 0;
-		
-//		infraredLeft = ADC1->ULLMEM.MEMRES[0];
-//		infraredCenter = ADC1->ULLMEM.MEMRES[1];
-//		infraredRight = ADC1->ULLMEM.MEMRES[2];
 		
 		infraredLeft = ADCValue[0];
 		infraredCenter = ADCValue[1];
 		infraredRight = ADCValue[2];
-		
-//		Serial_printf(&BluetoothSerial,"%d,%d,%d\r\n", infraredLeft, infraredCenter, infraredRight);
-//		
-////		switch (lineState) {
-////        case OffLine:
-////            if (infraredLeft > onLineInfrared ||
-////                infraredCenter > onLineInfrared ||
-////                infraredRight > onLineInfrared) {
-////                lineState = OnLine;
-////                action = Advance;
-////            }
-////            break;
+			
+		switch (lineState) {
+        case OffLine:
+            if (infraredLeft > onLineInfrared ||
+                infraredCenter > onLineInfrared ||
+                infraredRight > onLineInfrared) {
+                lineState = OnLine;
+                action = Trace;
+            }
+            break;
 
-////        case OnLine:
-////            if (infraredLeft < offLineInfrared &&
-////                infraredCenter < offLineInfrared &&
-////                infraredRight < offLineInfrared) {
-////                lineState = OffLine;
-////                action = Round;
-////            }
-////            if ((infraredLeft > onCrossInfrared &&
-////                 infraredCenter > onCrossInfrared) ||
-////                (infraredCenter > onCrossInfrared &&
-////                 infraredRight > onCrossInfrared)) {
-////                lineState = OnCross;
-////                action = Advance;
-////            }
-////            break;
-
-////        case OnCross:
-////            if (direction == Forward) {
-////                lineState = OnLine;
-////                action = Advance;
-////                break;
-////            }
-
-////            if (turnTimer == DISABLE) {
-////                switch (direction) {
-////                case TurnLeft:
-////                    turnDiffSpeed = -turnBaseSpeed;
-////                    turnTime = turnBaseTime;
-////                    break;
-
-////                case TurnRight:
-////                    turnDiffSpeed = turnBaseSpeed;
-////                    turnTime = turnBaseTime;
-////                    break;
-
-////                case TurnBack:
-////                    turnDiffSpeed = turnBaseSpeed;
-////                    turnTime = 2 * turnBaseTime;
-////                    break;
-
-////                default:
-////                    break;
-////                }
-////                lineState = OnCross;
-////                action = Turn;
-////                turnTimer = ENABLE;
-////            }
-////            if (turnTimer > turnTime) {
-////                lineState = OnLine;
-////                action = Advance;
-////                turnTimer = DISABLE;
-////            }
-////            break;
-////        }
+        case OnLine:
+            if (infraredLeft < offLineInfrared &&
+                infraredCenter < offLineInfrared &&
+                infraredRight < offLineInfrared) {
+                lineState = OffLine;
+                action = Advance;
+            }
+        }
 
         switch (action) {
         case Stop:
@@ -285,7 +220,7 @@ void taskTimer_INST_IRQHandler(void) {
             Motor_set(&motorRight, rightPIDOut);
             break;
 
-        case Advance:
+        case Trace:
             if (infraredCenter > infraredMaxCenter) {
                 tracePIDError = infraredLeft - infraredRight;
             } else if (infraredLeft > infraredRight) {
@@ -309,6 +244,16 @@ void taskTimer_INST_IRQHandler(void) {
             Motor_set(&motorLeft, leftPIDOut);
             Motor_set(&motorRight, rightPIDOut);
             break;
+			
+		case Advance:
+			leftPIDOut =
+                PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM - advanceBaseSpeed);
+            rightPIDOut =
+                PID_Caculate(&motorRightPID, speedRight * encoderRightToPWM - advanceBaseSpeed);
+
+            Motor_set(&motorLeft, leftPIDOut);
+            Motor_set(&motorRight, rightPIDOut);
+			break;
 
         case Turn:
             if (turnTimer) {
@@ -326,22 +271,8 @@ void taskTimer_INST_IRQHandler(void) {
                 turnTimer += 10;
             }
             break;
-
-        case Round:
-            leftPIDOut = PID_Caculate(&motorLeftPID,
-                                      speedLeft * encoderLeftToPWM - (+roundSpeed));
-            rightPIDOut = PID_Caculate(
-                &motorRightPID, speedRight * encoderRightToPWM - (-roundSpeed));
-            LIMIT(leftPIDOut, -7200, 7200);
-            LIMIT(rightPIDOut, -7200, 7200);
-
-            Motor_set(&motorLeft, leftPIDOut);
-            Motor_set(&motorRight, rightPIDOut);
-            break;
         }
     }
-	
-//	Serial_printf(&BluetoothSerial, "%d,%d,%d,%d\n",leftPIDOut, rightPIDOut, (int16_t)(speedLeft * encoderLeftToPWM), (int16_t)(speedRight * encoderRightToPWM));
 }
 
 void infraredADC_INST_IRQHandler(void) {
