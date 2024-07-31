@@ -56,7 +56,7 @@ SensorMsg msg = {
 	.G = {0.0f, 0.0f, 0.0f}
 };
 
-#define MAPPING(x) ((x) >= 0 ? (x) : (360 + (x)))
+#define MAPPING_AT_35TURN(x) ((x) >= 180 ? (x) : (360 + (x)))
 
 volatile uint32_t ms = 0;
 
@@ -191,7 +191,7 @@ int16_t encoderLeft, encoderRight;
 uint16_t infraredLeft, infraredCenter, infraredRight;
 
 float AdvanceYaw, turnTimeYaw  = 180, turnTargetYaw;
-float turnDiffYaw[] = {-38.66 * 2.333, 49.00 * 2.333, -48.0 * 2.333, 0 * 2.333, -44.69 * 2.333, 44.00 * 2.333, 44.69 * 2.333, 44.00 * 2.333,};
+float turnDiffYaw[] = {-38.66 * 2.333, 49.49 * 2.333, -46.70 * 2.333, 50.0 * 2.333, -45.96 * 2.333, 48.72 * 2.333, -45.50 * 2.333, 49.95 * 2.333,};
 int16_t yawPIDOut;
 
 uint16_t ADCValue[3];
@@ -300,8 +300,8 @@ int main(void) {
 				if (ControllerFlag) {
 					DL_GPIO_setPins(LED_PORT, LED_LED1_PIN);
 					DL_GPIO_clearPins(Buzzer_PORT, Buzzer_Buzzer1_PIN);
-					ControllerFlag++;
-					if (ms - ControllerFlag > 1200) {
+//					ControllerFlag++;
+					if (ms - ControllerFlag > 800) {
 						DL_GPIO_clearPins(LED_PORT, LED_LED1_PIN);
 						DL_GPIO_setPins(Buzzer_PORT, Buzzer_Buzzer1_PIN);
 						ControllerFlag = RESET;
@@ -499,8 +499,14 @@ void taskTimer_INST_IRQHandler(void) {
 
     case Turn:
 				if (turnTimer) {
-					turnTargetYaw = turnTimeYaw + turnDiffYaw[traceToTurnCount];		
-					yawPIDOut = PID_Caculate(&turnYawPID, YAW - turnTargetYaw);
+					if (traceToTurnCount == 3 || traceToTurnCount == 5 || traceToTurnCount == 7) {
+						turnTargetYaw = turnTimeYaw + turnDiffYaw[traceToTurnCount];		
+						yawPIDOut = PID_Caculate(&turnYawPID, MAPPING_AT_35TURN(YAW) - turnTargetYaw);
+						
+					} else {
+						turnTargetYaw = turnTimeYaw + turnDiffYaw[traceToTurnCount];		
+						yawPIDOut = PID_Caculate(&turnYawPID, YAW - turnTargetYaw);
+					}
 					
 					leftPIDOut = PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM -
 																											 (+yawPIDOut));	
