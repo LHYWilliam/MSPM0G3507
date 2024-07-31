@@ -169,6 +169,8 @@ uint8_t infraredState[4];
 
 uint8_t traceToAdvancceCount = 0, traceToTurnCount = 0;
 
+uint32_t ControllerFlag;
+
 int main(void) {
   SYSCFG_DL_init();
 
@@ -203,8 +205,6 @@ int main(void) {
 
   NVIC_ClearPendingIRQ(taskTimer_INST_INT_IRQN);
   NVIC_EnableIRQ(taskTimer_INST_INT_IRQN);
-//	Motor_set(&motorLeft, 1024);
-//	Motor_set(&motorRight, 1024);
 
   while (1) {
 //			OLED_ShowSignedNum(1, 1, -encoderLeft, 4);
@@ -236,7 +236,17 @@ int main(void) {
 		OLED_ShowNum(3, 13, (uint32_t)(getRoll() * 100) % 100, 2);			
 		OLED_ShowString(4, 1, "Pitch:");
 		OLED_ShowSignedNum(4, 8, getPitch(), 3);
-		OLED_ShowNum(4, 13, (uint32_t)(getPitch() * 100) % 100, 2);	
+		OLED_ShowNum(4, 13, (uint32_t)(getPitch() * 100) % 100, 2);
+				if (ControllerFlag) {
+					DL_GPIO_setPins(LED_PORT, LED_LED1_PIN);
+					DL_GPIO_clearPins(Buzzer_PORT, Buzzer_Buzzer1_PIN);
+					ControllerFlag++;
+					if (ms - ControllerFlag > 1000) {
+						DL_GPIO_clearPins(LED_PORT, LED_LED1_PIN);
+						DL_GPIO_setPins(Buzzer_PORT, Buzzer_Buzzer1_PIN);
+						ControllerFlag = RESET;
+					}
+				}
   }
 }
 
@@ -273,6 +283,8 @@ void taskTimer_INST_IRQHandler(void) {
 											lineState = OnLine;
 											action = Trace;
 										}
+										
+										ControllerFlag = ms;
 										
 										tracePID.integrator = 0;
 										motorLeftPID.integrator = 0;
@@ -363,6 +375,8 @@ void taskTimer_INST_IRQHandler(void) {
 											action = Stop;
 										}
 									}
+									
+									ControllerFlag = ms;
 								}
     }
 
@@ -407,7 +421,7 @@ void taskTimer_INST_IRQHandler(void) {
 						yawPIDOut = PID_Caculate(&advanceYawPID, YAW - 180);
 					} else if (traceToAdvancceCount == 1){
 //						advanceYawPID.Kp = 0.9 - 0.005;
-						yawPIDOut = PID_Caculate(&advanceYawPID, YAW - 116.5);
+						yawPIDOut = PID_Caculate(&advanceYawPID, YAW - 117.15);
 					}
 				} else if (question == 3 || question == 4) {
 					if (traceToTurnCount % 2 == 0){
