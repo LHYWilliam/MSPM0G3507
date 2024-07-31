@@ -136,7 +136,7 @@ uint16_t advanceBaseSpeed = 2048, turnBaseTime = 1000, adaptBaseSpeed = 512;
 
 int16_t AdvancediffSpeed, turnDiffSpeed, adaptDiffSpeed;
 uint16_t turnTime = 1000, turnTimer = DISABLE;
-uint8_t infraredFilterTime = 3;
+uint8_t infraredFilterTime = 1;
 
 int16_t speedLeft, speedRight;
 int16_t leftPIDOut, rightPIDOut, tracePIDError;
@@ -144,7 +144,8 @@ int16_t leftPIDOut, rightPIDOut, tracePIDError;
 int16_t encoderLeft, encoderRight;
 uint16_t infraredLeft, infraredCenter, infraredRight;
 
-float pitch, roll, yaw, AdvanceYaw, turnTimeYaw, turnDiffYaw = 42.98, turnTargetYaw;
+float pitch, roll, yaw, AdvanceYaw, turnTimeYaw, turnTargetYaw;
+float turnDiffYaw[] = {44.69, 44.00,44.69,44.00,44.69,44.00,44.69,44.00,};
 int16_t yawPIDOut;
 
 uint16_t ADCValue[3];
@@ -387,9 +388,9 @@ void taskTimer_INST_IRQHandler(void) {
     case Turn:
 				if (turnTimer) {
 					if (traceToTurnCount % 2 == 1) {
-						turnTargetYaw = MAPPING(turnTimeYaw + turnDiffYaw);
+						turnTargetYaw = MAPPING(turnTimeYaw + turnDiffYaw[traceToTurnCount - 1]);
 					} else {
-						turnTargetYaw = turnTimeYaw - turnDiffYaw;
+						turnTargetYaw = turnTimeYaw - turnDiffYaw[traceToTurnCount - 1];
 					}
 					yawPIDOut = PID_Caculate(&turnYawPID, MAPPING(yaw) - turnTargetYaw);
 					
