@@ -222,12 +222,18 @@ extern "C" {
 /* Port definition for Pin Group infrared */
 #define infrared_PORT                                                    (GPIOB)
 
-/* Defines for infrared1: GPIOB.3 with pinCMx 16 on package pin 51 */
-#define infrared_infrared1_PIN                                   (DL_GPIO_PIN_3)
-#define infrared_infrared1_IOMUX                                 (IOMUX_PINCM16)
-/* Defines for infrared2: GPIOB.2 with pinCMx 15 on package pin 50 */
-#define infrared_infrared2_PIN                                   (DL_GPIO_PIN_2)
-#define infrared_infrared2_IOMUX                                 (IOMUX_PINCM15)
+/* Defines for infrared1: GPIOB.2 with pinCMx 15 on package pin 50 */
+#define infrared_infrared1_PIN                                   (DL_GPIO_PIN_2)
+#define infrared_infrared1_IOMUX                                 (IOMUX_PINCM15)
+/* Defines for infrared2: GPIOB.3 with pinCMx 16 on package pin 51 */
+#define infrared_infrared2_PIN                                   (DL_GPIO_PIN_3)
+#define infrared_infrared2_IOMUX                                 (IOMUX_PINCM16)
+/* Defines for infrared3: GPIOB.8 with pinCMx 25 on package pin 60 */
+#define infrared_infrared3_PIN                                   (DL_GPIO_PIN_8)
+#define infrared_infrared3_IOMUX                                 (IOMUX_PINCM25)
+/* Defines for infrared4: GPIOB.9 with pinCMx 26 on package pin 61 */
+#define infrared_infrared4_PIN                                   (DL_GPIO_PIN_9)
+#define infrared_infrared4_IOMUX                                 (IOMUX_PINCM26)
 /* Port definition for Pin Group Key */
 #define Key_PORT                                                         (GPIOA)
 

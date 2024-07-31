@@ -56,7 +56,7 @@ SensorMsg msg = {
 	.G = {0.0f, 0.0f, 0.0f}
 };
 
-#define MAPPING_AT_35TURN(x) ((x) >= 180 ? (x) : (360 + (x)))
+#define MAPPING(x) ((x) >= 180 ? (x) : (360 + (x)))
 
 volatile uint32_t ms = 0;
 
@@ -182,7 +182,7 @@ uint16_t advanceBaseSpeed = 2048, turnBaseTime = 1000, adaptBaseSpeed = 512;
 
 int16_t AdvancediffSpeed, turnDiffSpeed, adaptDiffSpeed;
 uint16_t turnTime = 1000, turnTimer = ENABLE;
-uint8_t infraredFilterTime = 1;
+uint8_t infraredFilterTime = 2;
 
 int16_t speedLeft, speedRight;
 int16_t leftPIDOut, rightPIDOut, tracePIDError;
@@ -328,7 +328,9 @@ void taskTimer_INST_IRQHandler(void) {
     infraredRight = ADCValue[2];
 		
 		infraredState[0] += DL_GPIO_readPins(infrared_PORT, infrared_infrared1_PIN) ? 1 : 0;
-		infraredState[3] += DL_GPIO_readPins(infrared_PORT, infrared_infrared2_PIN) ? 1 : 0;
+		infraredState[1] += DL_GPIO_readPins(infrared_PORT, infrared_infrared2_PIN) ? 1 : 0;
+		infraredState[2] += DL_GPIO_readPins(infrared_PORT, infrared_infrared3_PIN) ? 1 : 0;
+		infraredState[3] += DL_GPIO_readPins(infrared_PORT, infrared_infrared4_PIN) ? 1 : 0;
 
     switch (lineState) {
 		case OffLine:
@@ -351,7 +353,8 @@ void taskTimer_INST_IRQHandler(void) {
 										motorRightPID.integrator = 0;
 									}										
 											
-									if (infraredState[0] > infraredFilterTime || infraredState[3] > infraredFilterTime) {
+									if (infraredState[0] > infraredFilterTime || infraredState[1] > infraredFilterTime
+										  || infraredState[2] > infraredFilterTime|| infraredState[3] > infraredFilterTime) {
 										lineState = OffLine;
 										action = Adapt;
 									}
@@ -501,7 +504,7 @@ void taskTimer_INST_IRQHandler(void) {
 				if (turnTimer) {
 					if (traceToTurnCount == 3 || traceToTurnCount == 5 || traceToTurnCount == 7) {
 						turnTargetYaw = turnTimeYaw + turnDiffYaw[traceToTurnCount];		
-						yawPIDOut = PID_Caculate(&turnYawPID, MAPPING_AT_35TURN(YAW) - turnTargetYaw);
+						yawPIDOut = PID_Caculate(&turnYawPID, MAPPING(YAW) - turnTargetYaw);
 						
 					} else {
 						turnTargetYaw = turnTimeYaw + turnDiffYaw[traceToTurnCount];		
@@ -523,6 +526,10 @@ void taskTimer_INST_IRQHandler(void) {
 		case Adapt:
 			if (infraredState[0] > infraredFilterTime) {
 				adaptDiffSpeed = -2 * adaptBaseSpeed;
+			} else if (infraredState[1] > infraredFilterTime) {
+				adaptDiffSpeed = -1 * adaptBaseSpeed;
+			}else if (infraredState[2] > infraredFilterTime) {
+				adaptDiffSpeed = 1 * adaptBaseSpeed;
 			} else if (infraredState[3] > infraredFilterTime) {
 				adaptDiffSpeed = 2 * adaptBaseSpeed;
 			}
