@@ -58,7 +58,7 @@ SensorMsg msg = {
 #define MAPPING(x) ((x) >= 0 ? (x) : (360 + (x)))
 
 volatile uint32_t ms = 0;
-uint8_t question = 2;
+uint8_t question = 3;
 
 Serial BluetoothSerial = {
     .uart = Bluetooth_INST,
@@ -85,7 +85,7 @@ Motor motorRight = {
 };
 
 PID tracePID = {
-    .Kp = -0.3,
+    .Kp = -0.5,
     .Ki = 0,
     .Kd = -0.001,
     .imax = 1024,
@@ -132,7 +132,7 @@ typedef enum {
   Turn,
 	Adapt,
 } ActionType;
-ActionType action = Advance;
+ActionType action =  Turn;
 char *actionString[] = {"Stop", "Trace", "Advance", "Turn"};
 
 typedef enum {
@@ -147,11 +147,11 @@ void Serial_Handler(Serial *serial);
 
 float encoderLeftToPWM = 7200. / 70.685, encoderRightToPWM = 7200 / 70.285;
 uint16_t infraredMax = 3850, infraredMaxCenter = 2500;
-uint16_t offLineInfrared = 2000, onLineInfrared = 2600;
+uint16_t offLineInfrared = 2000, onLineInfrared = 2800;
 uint16_t advanceBaseSpeed = 2048, turnBaseTime = 1000, adaptBaseSpeed = 512;
 
 int16_t AdvancediffSpeed, turnDiffSpeed, adaptDiffSpeed;
-uint16_t turnTime = 1000, turnTimer = DISABLE;
+uint16_t turnTime = 1000, turnTimer = ENABLE;
 uint8_t infraredFilterTime = 1;
 
 int16_t speedLeft, speedRight;
@@ -160,8 +160,8 @@ int16_t leftPIDOut, rightPIDOut, tracePIDError;
 int16_t encoderLeft, encoderRight;
 uint16_t infraredLeft, infraredCenter, infraredRight;
 
-float AdvanceYaw, turnTimeYaw, turnTargetYaw;
-float turnDiffYaw[] = {44.69, 44.00,44.69,44.00,44.69,44.00,44.69,44.00,};
+float AdvanceYaw, turnTimeYaw  = 180, turnTargetYaw;
+float turnDiffYaw[] = {-38.66 * 2.333, 48.80 * 2.333, 44.69 * 2.333, 44.00 * 2.333, 44.69 * 2.333, 44.00 * 2.333, 44.69 * 2.333, 44.00 * 2.333,};
 int16_t yawPIDOut;
 
 uint16_t ADCValue[3];
@@ -241,7 +241,7 @@ int main(void) {
 					DL_GPIO_setPins(LED_PORT, LED_LED1_PIN);
 					DL_GPIO_clearPins(Buzzer_PORT, Buzzer_Buzzer1_PIN);
 					ControllerFlag++;
-					if (ms - ControllerFlag > 1000) {
+					if (ms - ControllerFlag > 1200) {
 						DL_GPIO_clearPins(LED_PORT, LED_LED1_PIN);
 						DL_GPIO_setPins(Buzzer_PORT, Buzzer_Buzzer1_PIN);
 						ControllerFlag = RESET;
@@ -327,6 +327,8 @@ void taskTimer_INST_IRQHandler(void) {
 										motorLeftPID.integrator = 0;
 										motorRightPID.integrator = 0;
 										}
+										
+										ControllerFlag = ms;
 									}
 									break;
 									
@@ -420,15 +422,10 @@ void taskTimer_INST_IRQHandler(void) {
 					if (traceToAdvancceCount == 0) {
 						yawPIDOut = PID_Caculate(&advanceYawPID, YAW - 180);
 					} else if (traceToAdvancceCount == 1){
-//						advanceYawPID.Kp = 0.9 - 0.005;
 						yawPIDOut = PID_Caculate(&advanceYawPID, YAW - 117.15);
 					}
 				} else if (question == 3 || question == 4) {
-					if (traceToTurnCount % 2 == 0){
-						yawPIDOut = PID_Caculate(&turnYawPID, YAW - AdvanceYaw);
-					} else {
-						yawPIDOut = PID_Caculate(&turnYawPID, MAPPING(YAW) - MAPPING(AdvanceYaw));
-					}
+					yawPIDOut = PID_Caculate(&turnYawPID, YAW - AdvanceYaw);
 				}
 				
 				leftPIDOut = PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM -
@@ -442,12 +439,8 @@ void taskTimer_INST_IRQHandler(void) {
 
     case Turn:
 				if (turnTimer) {
-					if (traceToTurnCount % 2 == 1) {
-						turnTargetYaw = MAPPING(turnTimeYaw + turnDiffYaw[traceToTurnCount - 1]);
-					} else {
-						turnTargetYaw = turnTimeYaw - turnDiffYaw[traceToTurnCount - 1];
-					}
-					yawPIDOut = PID_Caculate(&turnYawPID, MAPPING(YAW) - turnTargetYaw);
+					turnTargetYaw = turnTimeYaw + turnDiffYaw[traceToTurnCount];		
+					yawPIDOut = PID_Caculate(&turnYawPID, YAW - turnTargetYaw);
 					
 					leftPIDOut = PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM -
 																											 (+yawPIDOut));	
