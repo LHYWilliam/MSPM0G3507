@@ -38,6 +38,22 @@
 #include "motor.h"
 #include "pid.h"
 #include "serial.h"
+#include "mpu.h"
+
+#include "MadgwickAHRS.h"
+
+#define YAW (getYaw() - 180)
+
+MPU6050Params mpu6050 = {
+    .MPU6050dt = 10,
+    .preMillis = 0,
+    .MPU6050ERROE = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
+};
+
+SensorMsg msg = {
+	.A = {0.0f, 0.0f, 0.0f},
+	.G = {0.0f, 0.0f, 0.0f}
+};
 
 #define MAPPING(x) ((x) >= 0 ? (x) : (360 + (x)))
 
@@ -157,8 +173,11 @@ int main(void) {
   SYSCFG_DL_init();
 
   OLED_Init();
-  DMP_Init();
-  Serial_init(&BluetoothSerial);
+	Serial_init(&BluetoothSerial);
+	
+	begin(1000.0f / (float)mpu6050.MPU6050dt);
+	MPU_Init();
+	MPU_getError();
 
   NVIC_ClearPendingIRQ(msTimer_INST_INT_IRQN);
   NVIC_EnableIRQ(msTimer_INST_INT_IRQN);
@@ -188,14 +207,31 @@ int main(void) {
 //    OLED_ShowNum(1, 1, infraredLeft, 4);
 //    OLED_ShowNum(2, 1, infraredCenter, 4);
 //    OLED_ShowNum(3, 1, infraredRight, 4);
-		DMP_GetData(&pitch, &roll, &yaw);
+//		DMP_GetData(&pitch, &roll, &yaw);
+//		OLED_ShowSignedNum(1, 1, pitch, 4);
+//		OLED_ShowSignedNum(2, 1, roll, 4);
+		OLED_ShowSignedNum(3, 1, YAW, 3);
 //		OLED_ShowSignedNum(1, 1, yaw, 4);
 //		OLED_ShowNum(2, 1, traceToAdvancceCount, 6);
 //		OLED_ShowString(3, 1, actionString[action]);
-		OLED_ShowNum(1, 1, infraredState[0], 1);
-		OLED_ShowNum(2, 1, infraredState[1], 1);
-		OLED_ShowNum(3, 1, infraredState[2], 1);
-		OLED_ShowNum(4, 1, infraredState[3], 1);
+//		OLED_ShowNum(1, 1, infraredState[0], 1);
+//		OLED_ShowNum(2, 1, infraredState[1], 1);
+//		OLED_ShowNum(3, 1, infraredState[2], 1);
+//		OLED_ShowNum(4, 1, infraredState[3], 1);
+			if(ms - mpu6050.preMillis >= mpu6050.MPU6050dt) {
+				mpu6050.preMillis = ms;
+				dataGetAndFilter();		                     
+				updateIMU(msg.G[0], msg.G[1], msg.G[2], msg.A[0], msg.A[1], msg.A[2]);
+			}
+//		OLED_ShowString(2, 1, "Yaw:");
+//		OLED_ShowSignedNum(2, 8, getYaw(), 3);
+//		OLED_ShowNum(2, 13, (uint32_t)(getYaw() * 100) % 100, 2);			
+//		OLED_ShowString(3, 1, "Roll:");
+//		OLED_ShowSignedNum(3, 8, getRoll(), 3);
+//		OLED_ShowNum(3, 13, (uint32_t)(getRoll() * 100) % 100, 2);			
+//		OLED_ShowString(4, 1, "Pitch:");
+//		OLED_ShowSignedNum(4, 8, getPitch(), 3);
+//		OLED_ShowNum(4, 13, (uint32_t)(getPitch() * 100) % 100, 2);	
   }
 }
 

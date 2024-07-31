@@ -564,6 +564,16 @@
               <FileType>5</FileType>
               <FilePath>..\mpu\mpui2c.h</FilePath>
             </File>
+            <File>
+              <FileName>MadgwickAHRS.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mpu\MadgwickAHRS.c</FilePath>
+            </File>
+            <File>
+              <FileName>MadgwickAHRS.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\mpu\MadgwickAHRS.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
