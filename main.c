@@ -42,7 +42,7 @@
 #define MAPPING(x) ((x) >= 0 ? (x) : (360 + (x)))
 
 volatile uint32_t ms = 0;
-uint8_t question = 2;
+uint8_t question = 4;
 
 Serial BluetoothSerial = {
     .uart = Bluetooth_INST,
@@ -144,7 +144,7 @@ int16_t leftPIDOut, rightPIDOut, tracePIDError;
 int16_t encoderLeft, encoderRight;
 uint16_t infraredLeft, infraredCenter, infraredRight;
 
-float pitch, roll, yaw, AdvanceYaw, turnTimeYaw, turnTargetYaw = 42.98;
+float pitch, roll, yaw, AdvanceYaw, turnTimeYaw, turnDiffYaw = 42.98, turnTargetYaw;
 int16_t yawPIDOut;
 
 uint16_t ADCValue[3];
@@ -303,7 +303,7 @@ void taskTimer_INST_IRQHandler(void) {
 											lineState = OffLine;
 											action = Stop;
 										}
-									} else if (question == 3) {
+									} else if (question == 3 || question == 4) {
 										lineState = OffLine;
 										action = Turn;
 										
@@ -316,7 +316,7 @@ void taskTimer_INST_IRQHandler(void) {
 										turnTimer = ENABLE;
 										turnTimeYaw = yaw;
 										
-										if (traceToTurnCount >= 2) {
+										if ((question == 3 && traceToTurnCount >= 2) || (question == 4 && traceToTurnCount >= 8)) {
 											lineState = OffLine;
 											action = Stop;
 										}
@@ -367,8 +367,12 @@ void taskTimer_INST_IRQHandler(void) {
 						advanceYawPID.Kp = 0.9 - 0.005;
 						yawPIDOut = PID_Caculate(&advanceYawPID, yaw - (-180));
 					}
-				} else if (question == 3) {
-					yawPIDOut = PID_Caculate(&turnYawPID, yaw - AdvanceYaw);
+				} else if (question == 3 || question == 4) {
+					if (traceToTurnCount % 2 == 0){
+						yawPIDOut = PID_Caculate(&turnYawPID, yaw - AdvanceYaw);
+					} else {
+						yawPIDOut = PID_Caculate(&turnYawPID, MAPPING(yaw) - MAPPING(AdvanceYaw));
+					}
 				}
 				
 				leftPIDOut = PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM -
@@ -382,7 +386,12 @@ void taskTimer_INST_IRQHandler(void) {
 
     case Turn:
 				if (turnTimer) {
-					yawPIDOut = PID_Caculate(&turnYawPID, MAPPING(yaw) - MAPPING((turnTimeYaw + turnTargetYaw)));
+					if (traceToTurnCount % 2 == 1) {
+						turnTargetYaw = MAPPING(turnTimeYaw + turnDiffYaw);
+					} else {
+						turnTargetYaw = turnTimeYaw - turnDiffYaw;
+					}
+					yawPIDOut = PID_Caculate(&turnYawPID, MAPPING(yaw) - turnTargetYaw);
 					
 					leftPIDOut = PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM -
 																											 (+yawPIDOut));	
