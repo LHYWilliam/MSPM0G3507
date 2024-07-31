@@ -42,7 +42,7 @@
 #define MAPPING(x) ((x) >= 0 ? (x) : (360 + (x)))
 
 volatile uint32_t ms = 0;
-uint8_t question = 1;
+uint8_t question = 2;
 
 Serial BluetoothSerial = {
     .uart = Bluetooth_INST,
@@ -114,6 +114,7 @@ typedef enum {
   Trace,
   Advance,
   Turn,
+	Adapt,
 } ActionType;
 ActionType action = Advance;
 char *actionString[] = {"Stop", "Trace", "Advance", "Turn"};
@@ -130,11 +131,12 @@ void Serial_Handler(Serial *serial);
 
 float encoderLeftToPWM = 7200. / 70.685, encoderRightToPWM = 7200 / 70.285;
 uint16_t infraredMax = 3850, infraredMaxCenter = 2500;
-uint16_t offLineInfrared = 900, onLineInfrared = 1800;
-uint16_t advanceBaseSpeed = 2048, turnBaseTime = 1000;
+uint16_t offLineInfrared = 1000, onLineInfrared = 2000;
+uint16_t advanceBaseSpeed = 2048, turnBaseTime = 1000, adaptBaseSpeed = 512;
 
-int16_t AdvancediffSpeed, turnDiffSpeed;
+int16_t AdvancediffSpeed, turnDiffSpeed, adaptDiffSpeed;
 uint16_t turnTime = 1000, turnTimer = DISABLE;
+uint8_t infraredFilterTime = 3;
 
 int16_t speedLeft, speedRight;
 int16_t leftPIDOut, rightPIDOut, tracePIDError;
@@ -146,6 +148,7 @@ float pitch, roll, yaw, AdvanceYaw, turnTimeYaw, turnTargetYaw = 42.98;
 int16_t yawPIDOut;
 
 uint16_t ADCValue[3];
+uint8_t infraredState[4];
 
 uint8_t traceToAdvancceCount = 0, traceToTurnCount = 0;
 
@@ -185,9 +188,13 @@ int main(void) {
 //    OLED_ShowNum(2, 1, infraredCenter, 4);
 //    OLED_ShowNum(3, 1, infraredRight, 4);
 		DMP_GetData(&pitch, &roll, &yaw);
-		OLED_ShowSignedNum(1, 1, yaw, 4);
-		OLED_ShowNum(2, 1, traceToAdvancceCount, 6);
-		OLED_ShowString(3, 1, actionString[action]);
+//		OLED_ShowSignedNum(1, 1, yaw, 4);
+//		OLED_ShowNum(2, 1, traceToAdvancceCount, 6);
+//		OLED_ShowString(3, 1, actionString[action]);
+		OLED_ShowNum(1, 1, infraredState[0], 1);
+		OLED_ShowNum(2, 1, infraredState[1], 1);
+		OLED_ShowNum(3, 1, infraredState[2], 1);
+		OLED_ShowNum(4, 1, infraredState[3], 1);
   }
 }
 
@@ -207,6 +214,9 @@ void taskTimer_INST_IRQHandler(void) {
     infraredLeft = ADCValue[0];
     infraredCenter = ADCValue[1];
     infraredRight = ADCValue[2];
+		
+		infraredState[0] += DL_GPIO_readPins(infrared_PORT, infrared_infrared1_PIN) ? 1 : 0;
+		infraredState[3] += DL_GPIO_readPins(infrared_PORT, infrared_infrared4_PIN) ? 1 : 0;
 
     switch (lineState) {
 		case OffLine:
@@ -225,8 +235,13 @@ void taskTimer_INST_IRQHandler(void) {
 										tracePID.integrator = 0;
 										motorLeftPID.integrator = 0;
 										motorRightPID.integrator = 0;
-									}	
-									break;
+									}										
+											
+									if (infraredState[0] > infraredFilterTime || infraredState[3] > infraredFilterTime) {
+										lineState = OffLine;
+										action = Adapt;
+									}
+								break;
 								
 								case Turn:
 									turnTimer += 10;
@@ -235,8 +250,29 @@ void taskTimer_INST_IRQHandler(void) {
 										lineState = OffLine;
 										action = Advance;
 										
+										infraredState[0] = 0;
+										infraredState[1] = 0;
+										infraredState[2] = 0;
+										infraredState[3] = 0;
+										
 										AdvanceYaw = yaw;
 										turnTimer = DISABLE;
+									}
+									break;
+									
+								case Adapt:
+									if (infraredLeft > onLineInfrared || infraredCenter > onLineInfrared || infraredRight > onLineInfrared) {
+										if (question == 1) {
+											lineState = OffLine;
+											action = Stop;
+										} else {
+											lineState = OnLine;
+											action = Trace;
+											
+										tracePID.integrator = 0;
+										motorLeftPID.integrator = 0;
+										motorRightPID.integrator = 0;
+										}
 									}
 									break;
 									
@@ -254,6 +290,11 @@ void taskTimer_INST_IRQHandler(void) {
 										
 										traceToAdvancceCount++;
 										
+										infraredState[0] = 0;
+										infraredState[1] = 0;
+										infraredState[2] = 0;
+										infraredState[3] = 0;
+										
 										tracePID.integrator = 0;
 										motorLeftPID.integrator = 0;
 										motorRightPID.integrator = 0;
@@ -265,6 +306,11 @@ void taskTimer_INST_IRQHandler(void) {
 									} else if (question == 3) {
 										lineState = OffLine;
 										action = Turn;
+										
+										infraredState[0] = 0;
+										infraredState[1] = 0;
+										infraredState[2] = 0;
+										infraredState[3] = 0;
 										
 										traceToTurnCount++;
 										turnTimer = ENABLE;
@@ -349,6 +395,22 @@ void taskTimer_INST_IRQHandler(void) {
 					Motor_set(&motorRight, rightPIDOut);
 				}
 				break;
+		
+		case Adapt:
+			if (infraredState[0] > infraredFilterTime) {
+				adaptDiffSpeed = -2 * adaptBaseSpeed;
+			} else if (infraredState[3] > infraredFilterTime) {
+				adaptDiffSpeed = 2 * adaptBaseSpeed;
+			}
+			
+			leftPIDOut = PID_Caculate(&motorLeftPID, speedLeft * encoderLeftToPWM - (+adaptDiffSpeed));	
+			rightPIDOut = PID_Caculate(&motorRightPID, speedRight * encoderRightToPWM - (-adaptDiffSpeed));
+			LIMIT(leftPIDOut, -7200, 7200);
+			LIMIT(rightPIDOut, -7200, 7200);
+
+			Motor_set(&motorLeft,  leftPIDOut);
+			Motor_set(&motorRight, rightPIDOut);
+			break;
     }
   }
 }

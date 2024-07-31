@@ -208,6 +208,21 @@ extern "C" {
 /* Defines for MPUSDA: GPIOA.0 with pinCMx 1 on package pin 33 */
 #define MPU_MPUSDA_PIN                                           (DL_GPIO_PIN_0)
 #define MPU_MPUSDA_IOMUX                                          (IOMUX_PINCM1)
+/* Port definition for Pin Group infrared */
+#define infrared_PORT                                                    (GPIOB)
+
+/* Defines for infrared1: GPIOB.7 with pinCMx 24 on package pin 59 */
+#define infrared_infrared1_PIN                                   (DL_GPIO_PIN_7)
+#define infrared_infrared1_IOMUX                                 (IOMUX_PINCM24)
+/* Defines for infrared2: GPIOB.6 with pinCMx 23 on package pin 58 */
+#define infrared_infrared2_PIN                                   (DL_GPIO_PIN_6)
+#define infrared_infrared2_IOMUX                                 (IOMUX_PINCM23)
+/* Defines for infrared3: GPIOB.20 with pinCMx 48 on package pin 19 */
+#define infrared_infrared3_PIN                                  (DL_GPIO_PIN_20)
+#define infrared_infrared3_IOMUX                                 (IOMUX_PINCM48)
+/* Defines for infrared4: GPIOB.24 with pinCMx 52 on package pin 23 */
+#define infrared_infrared4_PIN                                  (DL_GPIO_PIN_24)
+#define infrared_infrared4_IOMUX                                 (IOMUX_PINCM52)
 
 /* clang-format on */
 
