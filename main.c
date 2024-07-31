@@ -38,6 +38,7 @@
 #include "motor.h"
 #include "pid.h"
 #include "serial.h"
+#include "key.h"
 #include "mpu.h"
 
 #include "MadgwickAHRS.h"
@@ -58,10 +59,39 @@ SensorMsg msg = {
 #define MAPPING(x) ((x) >= 0 ? (x) : (360 + (x)))
 
 volatile uint32_t ms = 0;
-uint8_t question = 1;
 
 Serial BluetoothSerial = {
     .uart = Bluetooth_INST,
+};
+
+Key key1 = {
+	.gpio = Key_PORT,
+	.pins = Key_Key1_PIN,
+	.mode = LOW,
+};
+
+Key key2 = {
+	.gpio = Key_PORT,
+	.pins = Key_Key2_PIN,
+	.mode = LOW,
+};
+
+Key key3 = {
+	.gpio = Key_PORT,
+	.pins = Key_Key3_PIN,
+	.mode = LOW,
+};
+
+Key key4 = {
+	.gpio = Key_PORT,
+	.pins = Key_Key4_PIN,
+	.mode = LOW,
+};
+
+Key key5 = {
+	.gpio = Key_PORT,
+	.pins = Key_Key5_PIN,
+	.mode = LOW,
 };
 
 Motor motorLeft = {
@@ -169,39 +199,69 @@ uint8_t infraredState[4];
 
 uint8_t traceToAdvancceCount = 0, traceToTurnCount = 0;
 
-uint32_t ControllerFlag;
+uint32_t questionChoosenFlag, ControllerFlag;
+
+uint8_t question = 0;
 
 int main(void) {
   SYSCFG_DL_init();
 
   OLED_Init();
-	Serial_init(&BluetoothSerial);
 	
-	Delay_ms(2000);
-	begin(1000.0f / (float)mpu6050.MPU6050dt);
-	MPU_Init();
-	MPU_getError();
-
-  NVIC_ClearPendingIRQ(msTimer_INST_INT_IRQN);
+	while (question == 0 || questionChoosenFlag == DISABLE) {
+		OLED_ShowString(1, 1, "question:     ");
+		OLED_ShowNum(1, 11, question, 1);
+		OLED_ShowString(2, 1, "conform:      ");
+		OLED_ShowString(2, 11, questionChoosenFlag ? "ENABLE" : "DISABLE");
+		
+		if (Key_read(&key1) == KEYDOWN) {
+			question = 1;
+		}
+		if (Key_read(&key2) == KEYDOWN) {
+			question = 2;
+		}
+		if (Key_read(&key3) == KEYDOWN) {
+			question = 3;
+		}
+		if (Key_read(&key4) == KEYDOWN) {
+			question = 4;
+		}
+		if (Key_read(&key5) == KEYDOWN) {
+			questionChoosenFlag = ENABLE;
+		}
+		
+		if (question == 1 || question ==2) {
+			action = Advance;
+		}
+		if (question == 3 || question ==4) {
+			action = Turn;
+		}
+	}
+	
+	NVIC_ClearPendingIRQ(msTimer_INST_INT_IRQN);
   NVIC_EnableIRQ(msTimer_INST_INT_IRQN);
-
-  NVIC_ClearPendingIRQ(Bluetooth_INST_INT_IRQN);
-  NVIC_EnableIRQ(Bluetooth_INST_INT_IRQN);
-
-  Serial_init(&BluetoothSerial);
+	
+	Serial_init(&BluetoothSerial);
   PID_Init(&tracePID);
 	PID_Init(&advanceYawPID);
 	PID_Init(&turnYawPID);
   PID_Init(&motorLeftPID);
   PID_Init(&motorRightPID);
-
-  DL_ADC12_startConversion(infraredADC_INST);
+	
+	Delay_ms(2000);
+	begin(1000.0f / (float)mpu6050.MPU6050dt);
+	MPU_Init();
+	MPU_getError();
+	
+	NVIC_ClearPendingIRQ(Bluetooth_INST_INT_IRQN);
+  NVIC_EnableIRQ(Bluetooth_INST_INT_IRQN);
 
   NVIC_ClearPendingIRQ(Encoder_INT_IRQN);
   NVIC_EnableIRQ(Encoder_INT_IRQN);
 
   NVIC_ClearPendingIRQ(infraredADC_INST_INT_IRQN);
   NVIC_EnableIRQ(infraredADC_INST_INT_IRQN);
+	DL_ADC12_startConversion(infraredADC_INST);
 
   NVIC_ClearPendingIRQ(taskTimer_INST_INT_IRQN);
   NVIC_EnableIRQ(taskTimer_INST_INT_IRQN);

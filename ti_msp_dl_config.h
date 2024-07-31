@@ -237,15 +237,15 @@ extern "C" {
 /* Defines for Key2: GPIOA.13 with pinCMx 35 on package pin 6 */
 #define Key_Key2_PIN                                            (DL_GPIO_PIN_13)
 #define Key_Key2_IOMUX                                           (IOMUX_PINCM35)
-/* Defines for Key3: GPIOA.14 with pinCMx 36 on package pin 7 */
-#define Key_Key3_PIN                                            (DL_GPIO_PIN_14)
-#define Key_Key3_IOMUX                                           (IOMUX_PINCM36)
-/* Defines for Key4: GPIOA.22 with pinCMx 47 on package pin 18 */
-#define Key_Key4_PIN                                            (DL_GPIO_PIN_22)
-#define Key_Key4_IOMUX                                           (IOMUX_PINCM47)
-/* Defines for Key5: GPIOA.23 with pinCMx 53 on package pin 24 */
-#define Key_Key5_PIN                                            (DL_GPIO_PIN_23)
-#define Key_Key5_IOMUX                                           (IOMUX_PINCM53)
+/* Defines for Key3: GPIOA.23 with pinCMx 53 on package pin 24 */
+#define Key_Key3_PIN                                            (DL_GPIO_PIN_23)
+#define Key_Key3_IOMUX                                           (IOMUX_PINCM53)
+/* Defines for Key4: GPIOA.14 with pinCMx 36 on package pin 7 */
+#define Key_Key4_PIN                                            (DL_GPIO_PIN_14)
+#define Key_Key4_IOMUX                                           (IOMUX_PINCM36)
+/* Defines for Key5: GPIOA.22 with pinCMx 47 on package pin 18 */
+#define Key_Key5_PIN                                            (DL_GPIO_PIN_22)
+#define Key_Key5_IOMUX                                           (IOMUX_PINCM47)
 
 /* clang-format on */
 
