@@ -58,7 +58,7 @@ SensorMsg msg = {
 #define MAPPING(x) ((x) >= 0 ? (x) : (360 + (x)))
 
 volatile uint32_t ms = 0;
-uint8_t question = 3;
+uint8_t question = 1;
 
 Serial BluetoothSerial = {
     .uart = Bluetooth_INST,
@@ -132,7 +132,7 @@ typedef enum {
   Turn,
 	Adapt,
 } ActionType;
-ActionType action =  Turn;
+ActionType action =  Advance;
 char *actionString[] = {"Stop", "Trace", "Advance", "Turn"};
 
 typedef enum {
@@ -422,7 +422,7 @@ void taskTimer_INST_IRQHandler(void) {
 					if (traceToAdvancceCount == 0) {
 						yawPIDOut = PID_Caculate(&advanceYawPID, YAW - 180);
 					} else if (traceToAdvancceCount == 1){
-						yawPIDOut = PID_Caculate(&advanceYawPID, YAW - 117.15);
+						yawPIDOut = PID_Caculate(&advanceYawPID, YAW - 118.15);
 					}
 				} else if (question == 3 || question == 4) {
 					yawPIDOut = PID_Caculate(&turnYawPID, YAW - AdvanceYaw);
