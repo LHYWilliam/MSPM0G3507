@@ -42,7 +42,7 @@
 
 #include "MadgwickAHRS.h"
 
-#define YAW (getYaw() - 180)
+#define YAW getYaw()
 
 MPU6050Params mpu6050 = {
     .MPU6050dt = 10,
@@ -65,9 +65,9 @@ Serial BluetoothSerial = {
 };
 
 Motor motorLeft = {
-    .IN1_gpio = MotorIN_LeftIN1_PORT,
+    .IN1_gpio = MotorIN_PORT,
     .IN1_pins = MotorIN_LeftIN1_PIN,
-    .IN2_gpio = MotorIN_LeftIN2_PORT,
+    .IN2_gpio = MotorIN_PORT,
     .IN2_pins = MotorIN_LeftIN2_PIN,
     .PWM = MotorPWM_INST,
     .Index = GPIO_MotorPWM_C0_IDX,
@@ -75,9 +75,9 @@ Motor motorLeft = {
 };
 
 Motor motorRight = {
-    .IN1_gpio = MotorIN_RightIN1_PORT,
+    .IN1_gpio = MotorIN_PORT,
     .IN1_pins = MotorIN_RightIN1_PIN,
-    .IN2_gpio = MotorIN_RightIN2_PORT,
+    .IN2_gpio = MotorIN_PORT,
     .IN2_pins = MotorIN_RightIN2_PIN,
     .PWM = MotorPWM_INST,
     .Index = GPIO_MotorPWM_C1_IDX,
@@ -132,7 +132,7 @@ typedef enum {
   Turn,
 	Adapt,
 } ActionType;
-ActionType action = Stop;
+ActionType action = Advance;
 char *actionString[] = {"Stop", "Trace", "Advance", "Turn"};
 
 typedef enum {
@@ -147,7 +147,7 @@ void Serial_Handler(Serial *serial);
 
 float encoderLeftToPWM = 7200. / 70.685, encoderRightToPWM = 7200 / 70.285;
 uint16_t infraredMax = 3850, infraredMaxCenter = 2500;
-uint16_t offLineInfrared = 1400, onLineInfrared = 2048;
+uint16_t offLineInfrared = 2000, onLineInfrared = 2600;
 uint16_t advanceBaseSpeed = 2048, turnBaseTime = 1000, adaptBaseSpeed = 512;
 
 int16_t AdvancediffSpeed, turnDiffSpeed, adaptDiffSpeed;
@@ -175,7 +175,7 @@ int main(void) {
   OLED_Init();
 	Serial_init(&BluetoothSerial);
 	
-	Delay_ms(1000);
+	Delay_ms(2000);
 	begin(1000.0f / (float)mpu6050.MPU6050dt);
 	MPU_Init();
 	MPU_getError();
@@ -203,8 +203,12 @@ int main(void) {
 
   NVIC_ClearPendingIRQ(taskTimer_INST_INT_IRQN);
   NVIC_EnableIRQ(taskTimer_INST_INT_IRQN);
+//	Motor_set(&motorLeft, 1024);
+//	Motor_set(&motorRight, 1024);
 
   while (1) {
+//			OLED_ShowSignedNum(1, 1, -encoderLeft, 4);
+//			OLED_ShowSignedNum(2, 1, encoderRight, 4);
 //    OLED_ShowNum(1, 1, infraredLeft, 4);
 //    OLED_ShowNum(2, 1, infraredCenter, 4);
 //    OLED_ShowNum(3, 1, infraredRight, 4);
@@ -244,7 +248,7 @@ void msTimer_INST_IRQHandler(void) {
 
 void taskTimer_INST_IRQHandler(void) {
   if (DL_TimerG_getPendingInterrupt(taskTimer_INST) == DL_TIMER_IIDX_ZERO) {
-    speedLeft = encoderLeft;
+    speedLeft = -encoderLeft;
     speedRight = encoderRight;
     encoderLeft = 0;
     encoderRight = 0;
@@ -254,7 +258,7 @@ void taskTimer_INST_IRQHandler(void) {
     infraredRight = ADCValue[2];
 		
 		infraredState[0] += DL_GPIO_readPins(infrared_PORT, infrared_infrared1_PIN) ? 1 : 0;
-		infraredState[3] += DL_GPIO_readPins(infrared_PORT, infrared_infrared4_PIN) ? 1 : 0;
+		infraredState[3] += DL_GPIO_readPins(infrared_PORT, infrared_infrared2_PIN) ? 1 : 0;
 
     switch (lineState) {
 		case OffLine:
@@ -400,10 +404,10 @@ void taskTimer_INST_IRQHandler(void) {
 				if (question == 1 || question == 2) {
 					float advanceTargetYaw = 0;
 					if (traceToAdvancceCount == 0) {
-						yawPIDOut = PID_Caculate(&advanceYawPID, YAW - 0);
+						yawPIDOut = PID_Caculate(&advanceYawPID, YAW - 180);
 					} else if (traceToAdvancceCount == 1){
 //						advanceYawPID.Kp = 0.9 - 0.005;
-						yawPIDOut = PID_Caculate(&advanceYawPID, YAW - YAW > 0 ? 180 : (-180));
+						yawPIDOut = PID_Caculate(&advanceYawPID, YAW - 116.5);
 					}
 				} else if (question == 3 || question == 4) {
 					if (traceToTurnCount % 2 == 0){

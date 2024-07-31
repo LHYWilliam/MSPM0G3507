@@ -42,7 +42,6 @@
 
 DL_TimerA_backupConfig gMotorPWMBackup;
 DL_TimerG_backupConfig gmsTimerBackup;
-DL_UART_Main_backupConfig gBluetoothBackup;
 
 /*
  *  ======== SYSCFG_DL_init ========
@@ -62,7 +61,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     /* Ensure backup structures have no valid state */
 	gMotorPWMBackup.backupRdy 	= false;
 	gmsTimerBackup.backupRdy 	= false;
-	gBluetoothBackup.backupRdy 	= false;
+
 
 }
 /*
@@ -75,7 +74,6 @@ SYSCONFIG_WEAK bool SYSCFG_DL_saveConfiguration(void)
 
 	retStatus &= DL_TimerA_saveConfiguration(MotorPWM_INST, &gMotorPWMBackup);
 	retStatus &= DL_TimerG_saveConfiguration(msTimer_INST, &gmsTimerBackup);
-	retStatus &= DL_UART_Main_saveConfiguration(Bluetooth_INST, &gBluetoothBackup);
 
     return retStatus;
 }
@@ -87,7 +85,6 @@ SYSCONFIG_WEAK bool SYSCFG_DL_restoreConfiguration(void)
 
 	retStatus &= DL_TimerA_restoreConfiguration(MotorPWM_INST, &gMotorPWMBackup, false);
 	retStatus &= DL_TimerG_restoreConfiguration(msTimer_INST, &gmsTimerBackup, false);
-	retStatus &= DL_UART_Main_restoreConfiguration(Bluetooth_INST, &gBluetoothBackup);
 
     return retStatus;
 }
@@ -124,6 +121,14 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
         GPIO_Bluetooth_IOMUX_TX, GPIO_Bluetooth_IOMUX_TX_FUNC);
     DL_GPIO_initPeripheralInputFunction(
         GPIO_Bluetooth_IOMUX_RX, GPIO_Bluetooth_IOMUX_RX_FUNC);
+
+    DL_GPIO_initDigitalOutputFeatures(LED_LED1_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_DOWN,
+		 DL_GPIO_DRIVE_STRENGTH_LOW, DL_GPIO_HIZ_DISABLE);
+
+    DL_GPIO_initDigitalOutputFeatures(Buzzer_Buzzer1_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_DRIVE_STRENGTH_LOW, DL_GPIO_HIZ_DISABLE);
 
     DL_GPIO_initDigitalOutput(OLED_OLEDSDA_IOMUX);
 
@@ -165,46 +170,67 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_DOWN,
 		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
-    DL_GPIO_initDigitalInputFeatures(infrared_infrared3_IOMUX,
-		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_DOWN,
+    DL_GPIO_initDigitalInputFeatures(Key_Key1_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
 		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
-    DL_GPIO_initDigitalInputFeatures(infrared_infrared4_IOMUX,
-		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_DOWN,
+    DL_GPIO_initDigitalInputFeatures(Key_Key2_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
 		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
-    DL_GPIO_clearPins(GPIOA, MotorIN_LeftIN1_PIN |
-		MotorIN_LeftIN2_PIN);
-    DL_GPIO_setPins(GPIOA, OLED_OLEDSDA_PIN |
+    DL_GPIO_initDigitalInputFeatures(Key_Key3_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+
+    DL_GPIO_initDigitalInputFeatures(Key_Key4_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+
+    DL_GPIO_initDigitalInputFeatures(Key_Key5_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+
+    DL_GPIO_clearPins(GPIOA, LED_LED1_PIN |
+		MotorIN_LeftIN1_PIN |
+		MotorIN_LeftIN2_PIN |
+		MotorIN_RightIN1_PIN |
+		MotorIN_RightIN2_PIN);
+    DL_GPIO_setPins(GPIOA, Buzzer_Buzzer1_PIN |
+		OLED_OLEDSDA_PIN |
 		OLED_OLEDSCL_PIN |
 		MPU_MPUSCL_PIN |
 		MPU_MPUSDA_PIN);
-    DL_GPIO_enableOutput(GPIOA, OLED_OLEDSDA_PIN |
+    DL_GPIO_enableOutput(GPIOA, LED_LED1_PIN |
+		Buzzer_Buzzer1_PIN |
+		OLED_OLEDSDA_PIN |
 		OLED_OLEDSCL_PIN |
 		MotorIN_LeftIN1_PIN |
 		MotorIN_LeftIN2_PIN |
+		MotorIN_RightIN1_PIN |
+		MotorIN_RightIN2_PIN |
 		MPU_MPUSCL_PIN |
 		MPU_MPUSDA_PIN);
-    DL_GPIO_setLowerPinsPolarity(GPIOA, DL_GPIO_PIN_12_EDGE_RISE_FALL);
-    DL_GPIO_setUpperPinsPolarity(GPIOA, DL_GPIO_PIN_24_EDGE_RISE_FALL |
-		DL_GPIO_PIN_22_EDGE_RISE_FALL |
-		DL_GPIO_PIN_17_EDGE_RISE_FALL);
-    DL_GPIO_setLowerPinsInputFilter(GPIOA, DL_GPIO_PIN_12_INPUT_FILTER_8_CYCLES);
-    DL_GPIO_setUpperPinsInputFilter(GPIOA, DL_GPIO_PIN_24_INPUT_FILTER_8_CYCLES |
-		DL_GPIO_PIN_22_INPUT_FILTER_8_CYCLES |
-		DL_GPIO_PIN_17_INPUT_FILTER_8_CYCLES);
-    DL_GPIO_clearInterruptStatus(GPIOA, Encoder_EncoderLeft1_PIN |
+    DL_GPIO_setLowerPinsInputFilter(GPIOA, DL_GPIO_PIN_12_INPUT_FILTER_8_CYCLES |
+		DL_GPIO_PIN_13_INPUT_FILTER_8_CYCLES |
+		DL_GPIO_PIN_14_INPUT_FILTER_8_CYCLES);
+    DL_GPIO_setUpperPinsInputFilter(GPIOA, DL_GPIO_PIN_22_INPUT_FILTER_8_CYCLES |
+		DL_GPIO_PIN_23_INPUT_FILTER_8_CYCLES);
+    DL_GPIO_setUpperPinsPolarity(GPIOB, DL_GPIO_PIN_18_EDGE_RISE_FALL |
+		DL_GPIO_PIN_19_EDGE_RISE_FALL |
+		DL_GPIO_PIN_20_EDGE_RISE_FALL |
+		DL_GPIO_PIN_24_EDGE_RISE_FALL);
+    DL_GPIO_setUpperPinsInputFilter(GPIOB, DL_GPIO_PIN_18_INPUT_FILTER_8_CYCLES |
+		DL_GPIO_PIN_19_INPUT_FILTER_8_CYCLES |
+		DL_GPIO_PIN_20_INPUT_FILTER_8_CYCLES |
+		DL_GPIO_PIN_24_INPUT_FILTER_8_CYCLES);
+    DL_GPIO_clearInterruptStatus(GPIOB, Encoder_EncoderLeft1_PIN |
 		Encoder_EncoderLeft2_PIN |
 		Encoder_EncoderRight1_PIN |
 		Encoder_EncoderRight2_PIN);
-    DL_GPIO_enableInterrupt(GPIOA, Encoder_EncoderLeft1_PIN |
+    DL_GPIO_enableInterrupt(GPIOB, Encoder_EncoderLeft1_PIN |
 		Encoder_EncoderLeft2_PIN |
 		Encoder_EncoderRight1_PIN |
 		Encoder_EncoderRight2_PIN);
-    DL_GPIO_clearPins(GPIOB, MotorIN_RightIN1_PIN |
-		MotorIN_RightIN2_PIN);
-    DL_GPIO_enableOutput(GPIOB, MotorIN_RightIN1_PIN |
-		MotorIN_RightIN2_PIN);
 
 }
 
@@ -223,7 +249,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_SYSCTL_init(void)
 	DL_SYSCTL_disableSYSPLL();
     DL_SYSCTL_enableMFCLK();
     /* INT_GROUP1 Priority */
-    NVIC_SetPriority(GPIOA_INT_IRQn, 1);
+    NVIC_SetPriority(GPIOB_INT_IRQn, 1);
 
 }
 
@@ -410,13 +436,13 @@ SYSCONFIG_WEAK void SYSCFG_DL_infraredADC_init(void)
         DL_ADC12_SEQ_START_ADDR_00, DL_ADC12_SEQ_END_ADDR_02, DL_ADC12_SAMP_CONV_RES_12_BIT,
         DL_ADC12_SAMP_CONV_DATA_FORMAT_UNSIGNED);
     DL_ADC12_configConversionMem(infraredADC_INST, infraredADC_ADCMEM_infraredLeft,
-        DL_ADC12_INPUT_CHAN_5, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
+        DL_ADC12_INPUT_CHAN_0, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
         DL_ADC12_BURN_OUT_SOURCE_DISABLED, DL_ADC12_TRIGGER_MODE_AUTO_NEXT, DL_ADC12_WINDOWS_COMP_MODE_DISABLED);
     DL_ADC12_configConversionMem(infraredADC_INST, infraredADC_ADCMEM_infraredCenter,
-        DL_ADC12_INPUT_CHAN_6, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
+        DL_ADC12_INPUT_CHAN_1, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
         DL_ADC12_BURN_OUT_SOURCE_DISABLED, DL_ADC12_TRIGGER_MODE_AUTO_NEXT, DL_ADC12_WINDOWS_COMP_MODE_DISABLED);
     DL_ADC12_configConversionMem(infraredADC_INST, infraredADC_ADCMEM_infraredRight,
-        DL_ADC12_INPUT_CHAN_7, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
+        DL_ADC12_INPUT_CHAN_2, DL_ADC12_REFERENCE_VOLTAGE_VDDA, DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
         DL_ADC12_BURN_OUT_SOURCE_DISABLED, DL_ADC12_TRIGGER_MODE_AUTO_NEXT, DL_ADC12_WINDOWS_COMP_MODE_DISABLED);
     DL_ADC12_setSampleTime0(infraredADC_INST,40000);
     /* Enable ADC12 interrupt */
