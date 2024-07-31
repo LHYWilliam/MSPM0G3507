@@ -40,9 +40,9 @@ float q1 = 0.0f;
 float q2 = 0.0f;
 float q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
 float invSampleFreq = 1.0f / 100.0f;
-extern float roll;
-extern float pitch;
-extern float yaw;
+float roll;
+float pitch;
+float yaw;
 int8_t anglesComputed = 0;
 
 uint8_t ID;
