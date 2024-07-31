@@ -191,7 +191,7 @@ int16_t encoderLeft, encoderRight;
 uint16_t infraredLeft, infraredCenter, infraredRight;
 
 float AdvanceYaw, turnTimeYaw  = 180, turnTargetYaw;
-float turnDiffYaw[] = {-38.66 * 2.333, 48.80 * 2.333, 44.69 * 2.333, 44.00 * 2.333, 44.69 * 2.333, 44.00 * 2.333, 44.69 * 2.333, 44.00 * 2.333,};
+float turnDiffYaw[] = {-38.66 * 2.333, 49.00 * 2.333, -48.0 * 2.333, 0 * 2.333, -44.69 * 2.333, 44.00 * 2.333, 44.69 * 2.333, 44.00 * 2.333,};
 int16_t yawPIDOut;
 
 uint16_t ADCValue[3];
